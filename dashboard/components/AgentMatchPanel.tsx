@@ -26,15 +26,21 @@ export default function AgentMatchPanel() {
   const [results, setResults] = useState<MatchResult[]>([]);
   const [loading, setLoading] = useState(false);
 
+  const [error, setError] = useState<string | null>(null);
+
   const handleMatch = async () => {
     if (!role || !action) return;
     setLoading(true);
+    setError(null);
     try {
       const res = await fetch(
         `/api/agents?role=${encodeURIComponent(role)}&action=${encodeURIComponent(action)}`
       );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setResults((prev) => [...prev, data]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Match failed");
     } finally {
       setLoading(false);
     }
@@ -66,6 +72,8 @@ export default function AgentMatchPanel() {
           {loading ? "Matching..." : "Match"}
         </button>
       </div>
+
+      {error && <div className="text-red-400 text-sm mb-2">{error}</div>}
 
       {results.length > 0 && (
         <div className="space-y-2">

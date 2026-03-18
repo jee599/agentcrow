@@ -31,13 +31,19 @@ export default function AgentLibrary() {
   const [data, setData] = useState<AgentsResponse | null>(null);
   const [filter, setFilter] = useState("");
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/agents")
-      .then((r) => r.json())
-      .then(setData);
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(setData)
+      .catch((err) => setError(err.message));
   }, []);
 
+  if (error) return <div className="text-red-400">Failed to load agents: {error}</div>;
   if (!data) return <div className="text-gray-500">Loading agents...</div>;
 
   const filteredDivisions = data.divisions
@@ -48,7 +54,7 @@ export default function AgentLibrary() {
         (a) =>
           !filter ||
           a.name.toLowerCase().includes(filter.toLowerCase()) ||
-          a.role.includes(filter.toLowerCase())
+          a.role.toLowerCase().includes(filter.toLowerCase())
       ),
     }))
     .filter((d) => d.agents.length > 0);
@@ -85,10 +91,10 @@ export default function AgentLibrary() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {division.agents.map((agent) => {
-              const badge = SOURCE_BADGE[agent.source];
+              const badge = SOURCE_BADGE[agent.source] ?? { label: agent.source, color: "bg-gray-800 text-gray-400" };
               return (
                 <div
-                  key={agent.role}
+                  key={`${division.name}-${agent.role}`}
                   className="border border-gray-800 rounded-lg p-4 hover:border-gray-600 transition-colors"
                 >
                   <div className="flex items-start justify-between mb-2">

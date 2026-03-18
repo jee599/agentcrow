@@ -157,3 +157,54 @@ export function getAgentsResponse(): AgentsResponse {
   cachedResponse = { divisions, total };
   return cachedResponse;
 }
+
+interface MatchResult {
+  agent: { name: string; role: string; source: { type: string }; description: string } | null;
+  matchType: "exact" | "fuzzy" | "none";
+  candidates?: Array<{ name: string; score: number }>;
+}
+
+export async function matchAgent(role: string, action: string): Promise<MatchResult> {
+  const data = getAgentsResponse();
+
+  // Exact match by role
+  for (const div of data.divisions) {
+    const found = div.agents.find((a) => a.role === role);
+    if (found) {
+      return {
+        agent: { name: found.name, role: found.role, source: { type: found.source }, description: found.description },
+        matchType: "exact",
+      };
+    }
+  }
+
+  // Fuzzy match by keywords in role/action
+  const queryWords = [...role.split("_"), ...action.split(/\s+/)].filter((w) => w.length > 2).map((w) => w.toLowerCase());
+  const scored: Array<{ agent: Agent; division: string; score: number }> = [];
+
+  for (const div of data.divisions) {
+    for (const agent of div.agents) {
+      let score = 0;
+      for (const q of queryWords) {
+        if (agent.role.includes(q)) score += 3;
+        if (agent.name.toLowerCase().includes(q)) score += 2;
+        if (agent.tags.some((t) => t.toLowerCase().includes(q))) score += 1;
+      }
+      if (score > 0) scored.push({ agent, division: div.name, score });
+    }
+  }
+
+  scored.sort((a, b) => b.score - a.score);
+  const candidates = scored.slice(0, 5).map((s) => ({ name: s.agent.name, score: s.score }));
+
+  if (scored.length > 0 && scored[0].score >= 4) {
+    const top = scored[0].agent;
+    return {
+      agent: { name: top.name, role: top.role, source: { type: top.source }, description: top.description },
+      matchType: "fuzzy",
+      candidates,
+    };
+  }
+
+  return { agent: null, matchType: "none", candidates };
+}
