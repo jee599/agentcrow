@@ -43,7 +43,7 @@ export class ClaudeCLIBridge {
 
       const proc = spawn('claude', args, {
         cwd: workingDir || process.cwd(),
-        shell: true,
+        shell: false,
         timeout: this.timeoutMs,
       });
 

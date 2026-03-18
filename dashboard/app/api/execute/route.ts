@@ -18,7 +18,7 @@ function runClaude(prompt: string, cwd: string, timeoutMs: number = 600000): Pro
     const start = Date.now();
     const proc = spawn("claude", ["--print", "--dangerously-skip-permissions", "-m", prompt], {
       cwd,
-      shell: true,
+      shell: false,
       timeout: timeoutMs,
     });
 
