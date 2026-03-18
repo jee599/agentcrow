@@ -13,7 +13,7 @@ export const LOCALES: Array<{ code: Locale; label: string; flag: string }> = [
 
 const translations: Record<Locale, Record<string, string>> = {
   en: {
-    "app.title": "AgentCraw",
+    "app.title": "AgentCrow",
     "app.version": "v0.1",
     "app.subtitle": "Enter a prompt to decompose tasks and match the best agent for each.",
     "nav.dashboard": "Dashboard",
@@ -106,7 +106,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "match.none": "No match — will use auto-generated agent",
   },
   ko: {
-    "app.title": "AgentCraw",
+    "app.title": "AgentCrow",
     "app.version": "v0.1",
     "app.subtitle": "프롬프트를 입력하면 태스크를 분해하고, 각 태스크에 최적의 에이전트를 매칭한다.",
     "nav.dashboard": "대시보드",
@@ -183,7 +183,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "match.none": "미매칭 — 자동 생성 에이전트 사용",
   },
   zh: {
-    "app.title": "AgentCraw",
+    "app.title": "AgentCrow",
     "app.version": "v0.1",
     "app.subtitle": "输入提示词，自动分解任务并为每个任务匹配最佳代理。",
     "nav.dashboard": "仪表板",
@@ -246,7 +246,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "match.none": "未匹配 — 将使用自动生成的代理",
   },
   ja: {
-    "app.title": "AgentCraw",
+    "app.title": "AgentCrow",
     "app.version": "v0.1",
     "app.subtitle": "プロンプトを入力すると、タスクを分解し、各タスクに最適なエージェントをマッチングします。",
     "nav.dashboard": "ダッシュボード",
@@ -309,7 +309,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "match.none": "未マッチ — 自動生成エージェントを使用",
   },
   es: {
-    "app.title": "AgentCraw",
+    "app.title": "AgentCrow",
     "app.version": "v0.1",
     "app.subtitle": "Ingresa un prompt para descomponer tareas y asignar el mejor agente a cada una.",
     "nav.dashboard": "Panel",
@@ -357,7 +357,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "match.none": "Sin coincidencia — se usará agente autogenerado",
   },
   de: {
-    "app.title": "AgentCraw",
+    "app.title": "AgentCrow",
     "app.version": "v0.1",
     "app.subtitle": "Gib einen Prompt ein, um Aufgaben zu zerlegen und den besten Agenten für jede zuzuweisen.",
     "nav.dashboard": "Dashboard",
@@ -405,7 +405,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "match.none": "Keine Übereinstimmung — autogenerierter Agent wird verwendet",
   },
   fr: {
-    "app.title": "AgentCraw",
+    "app.title": "AgentCrow",
     "app.version": "v0.1",
     "app.subtitle": "Entrez un prompt pour décomposer les tâches et attribuer le meilleur agent à chacune.",
     "nav.dashboard": "Tableau de bord",
@@ -453,7 +453,7 @@ const translations: Record<Locale, Record<string, string>> = {
     "match.none": "Aucune correspondance — agent autogénéré sera utilisé",
   },
   pt: {
-    "app.title": "AgentCraw",
+    "app.title": "AgentCrow",
     "app.version": "v0.1",
     "app.subtitle": "Insira um prompt para decompor tarefas e atribuir o melhor agente a cada uma.",
     "nav.dashboard": "Painel",

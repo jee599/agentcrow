@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AgentCraw Dashboard",
+  title: "AgentCrow Dashboard",
   description: "Agent Teams Dashboard",
 };
 

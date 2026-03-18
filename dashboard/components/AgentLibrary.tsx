@@ -40,6 +40,7 @@ export default function AgentLibrary() {
   const [filter, setFilter] = useState("");
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<{ agent: Agent; division: string } | null>(null);
 
   useEffect(() => {
     fetch("/api/agents")
@@ -120,15 +121,48 @@ export default function AgentLibrary() {
             {division.agents.map((agent) => {
               const srcColor = SOURCE_COLOR[agent.source] ?? "text-slate-400";
               const srcLabel = SOURCE_LABEL[agent.source] ?? agent.source;
+              const isSelected = selected?.agent.role === agent.role && selected?.division === division.name;
+              const roleDesc = t(`role.${agent.role}.desc`);
+              const roleName = t(`role.${agent.role}`);
+              const hasDesc = roleDesc !== `role.${agent.role}.desc`;
+              const hasName = roleName !== `role.${agent.role}`;
+
               return (
-                <div
-                  key={`${division.name}-${agent.role}`}
-                  className="flex items-center gap-3 py-1.5 text-xs hover:bg-slate-800/50 px-1 -mx-1 rounded transition-colors group"
-                >
-                  <span className="text-slate-100 w-52 truncate shrink-0">{agent.name}</span>
-                  <span className="font-mono text-slate-500 w-44 truncate shrink-0">{agent.role}</span>
-                  <span className={`${srcColor} text-[10px] w-24 shrink-0`}>{srcLabel}</span>
-                  <span className="text-slate-600 text-[10px] truncate">{t(`div.${division.label}`) !== `div.${division.label}` ? t(`div.${division.label}`) : division.label}</span>
+                <div key={`${division.name}-${agent.role}`}>
+                  <div
+                    onClick={() => setSelected(isSelected ? null : { agent, division: division.name })}
+                    className={`flex items-center gap-3 py-1.5 text-xs px-1 -mx-1 rounded transition-colors cursor-pointer ${
+                      isSelected ? "bg-violet-500/10" : "hover:bg-slate-800/50"
+                    }`}
+                  >
+                    <span className="text-slate-100 w-52 truncate shrink-0">{agent.name}</span>
+                    <span className="font-mono text-slate-500 w-44 truncate shrink-0">{agent.role}</span>
+                    <span className={`${srcColor} text-[10px] w-24 shrink-0`}>{srcLabel}</span>
+                    <span className="text-slate-600 text-[10px] truncate">{t(`div.${division.label}`) !== `div.${division.label}` ? t(`div.${division.label}`) : division.label}</span>
+                  </div>
+                  {isSelected && (
+                    <div className="px-2 py-2 mb-1 ml-1 border-l-2 border-violet-500/30 text-xs space-y-1">
+                      {hasName && (
+                        <div className="text-slate-200 font-medium">{roleName}</div>
+                      )}
+                      {hasDesc ? (
+                        <div className="text-slate-400 leading-relaxed">{roleDesc}</div>
+                      ) : agent.description ? (
+                        <div className="text-slate-400 leading-relaxed">{agent.description}</div>
+                      ) : (
+                        <div className="text-slate-600 italic">{agent.source === "external" ? "agency-agents" : "builtin"} agent</div>
+                      )}
+                      {agent.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 pt-1">
+                          {agent.tags.slice(0, 10).map((tag) => (
+                            <span key={tag} className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-500">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               );
             })}
