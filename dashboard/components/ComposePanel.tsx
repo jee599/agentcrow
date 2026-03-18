@@ -39,10 +39,26 @@ const SOURCE_STYLE: Record<string, { label: string; color: string }> = {
   generated: { label: "generated", color: "text-yellow-400" },
 };
 
+interface ExecutionResult {
+  results: Array<{
+    taskId: string;
+    role: string;
+    agentName: string;
+    status: "success" | "error" | "skipped";
+    output: string;
+    error?: string;
+    durationMs: number;
+  }>;
+  totalDurationMs: number;
+  summary: { total: number; success: number; error: number; skipped: number };
+}
+
 export default function ComposePanel() {
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState<ComposeResult | null>(null);
+  const [execResult, setExecResult] = useState<ExecutionResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [executing, setExecuting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleCompose = async () => {
@@ -63,6 +79,27 @@ export default function ComposePanel() {
       setError(err instanceof Error ? err.message : "Compose failed");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExecute = async () => {
+    if (!prompt.trim()) return;
+    setExecuting(true);
+    setError(null);
+    setExecResult(null);
+    try {
+      const res = await fetch("/api/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setExecResult(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Execution failed");
+    } finally {
+      setExecuting(false);
     }
   };
 
@@ -110,18 +147,27 @@ export default function ComposePanel() {
       {result && (
         <div className="space-y-4">
           {/* Summary */}
-          <div className="flex items-center gap-4 text-sm">
-            <span className="text-gray-400">
-              {result.summary.totalTasks} tasks decomposed
-            </span>
-            <span className="text-green-400">
-              {result.summary.matched} matched
-            </span>
-            {result.summary.unmatched > 0 && (
-              <span className="text-yellow-400">
-                {result.summary.unmatched} unmatched
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 text-sm">
+              <span className="text-gray-400">
+                {result.summary.totalTasks} tasks decomposed
               </span>
-            )}
+              <span className="text-green-400">
+                {result.summary.matched} matched
+              </span>
+              {result.summary.unmatched > 0 && (
+                <span className="text-yellow-400">
+                  {result.summary.unmatched} unmatched
+                </span>
+              )}
+            </div>
+            <button
+              onClick={handleExecute}
+              disabled={executing || result.summary.matched === 0}
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 px-6 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              {executing ? "Executing..." : "Execute Team"}
+            </button>
           </div>
 
           {/* Task Cards */}
@@ -185,6 +231,65 @@ export default function ComposePanel() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Execution Result */}
+      {execResult && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-4 text-sm border-t border-gray-800 pt-4">
+            <span className="font-medium text-white">Execution Result</span>
+            <span className="text-gray-400">
+              {(execResult.totalDurationMs / 1000).toFixed(1)}s
+            </span>
+            <span className="text-green-400">{execResult.summary.success} success</span>
+            {execResult.summary.error > 0 && (
+              <span className="text-red-400">{execResult.summary.error} error</span>
+            )}
+            {execResult.summary.skipped > 0 && (
+              <span className="text-yellow-400">{execResult.summary.skipped} skipped</span>
+            )}
+          </div>
+
+          <div className="space-y-3">
+            {execResult.results.map((r) => (
+              <div
+                key={r.taskId}
+                className={`border rounded-lg p-4 ${
+                  r.status === "success"
+                    ? "border-green-900/50"
+                    : r.status === "error"
+                    ? "border-red-900/50"
+                    : "border-yellow-900/50"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2 py-0.5 rounded ${
+                      r.status === "success" ? "bg-green-900/50 text-green-300" :
+                      r.status === "error" ? "bg-red-900/50 text-red-300" :
+                      "bg-yellow-900/50 text-yellow-300"
+                    }`}>
+                      {r.status}
+                    </span>
+                    <span className="text-sm font-medium">{r.agentName}</span>
+                    <span className="text-xs text-gray-600">{r.role}</span>
+                  </div>
+                  <span className="text-xs text-gray-600">
+                    {(r.durationMs / 1000).toFixed(1)}s
+                  </span>
+                </div>
+                {r.output && (
+                  <pre className="text-xs text-gray-400 bg-gray-900 rounded p-3 mt-2 overflow-x-auto max-h-60 overflow-y-auto whitespace-pre-wrap">
+                    {r.output}
+                  </pre>
+                )}
+                {r.error && (
+                  <div className="text-xs text-red-400 mt-2">{r.error}</div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
