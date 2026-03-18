@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "@/lib/locale-context";
 
 interface TaskResult {
   task: {
@@ -54,6 +55,7 @@ interface ExecutionResult {
 }
 
 export default function ComposePanel() {
+  const { t } = useLocale();
   const [prompt, setPrompt] = useState("");
   const [result, setResult] = useState<ComposeResult | null>(null);
   const [execResult, setExecResult] = useState<ExecutionResult | null>(null);
@@ -178,24 +180,24 @@ export default function ComposePanel() {
       {/* Input */}
       <div className="border border-gray-800 rounded-lg p-4">
         <label className="block text-sm text-gray-400 mb-2">
-          What do you want to build?
+          {t("compose.label")}
         </label>
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="e.g. React로 로그인 페이지 만들고 API 연동하고 테스트 작성하고 한국어 문서도 만들어줘"
+          placeholder={t("compose.placeholder")}
           rows={3}
           className="w-full bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-blue-500 resize-none"
         />
         <div className="flex items-center justify-between mt-3">
-          <span className="text-xs text-gray-600">Enter to compose</span>
+          <span className="text-xs text-gray-600">{t("compose.hint")}</span>
           <button
             onClick={handleCompose}
             disabled={loading || !prompt.trim()}
             className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-6 py-2 rounded-lg text-sm font-medium transition-colors"
           >
-            {loading ? "Composing..." : "Compose Team"}
+            {loading ? t("compose.composing") : t("compose.button")}
           </button>
         </div>
       </div>
@@ -213,14 +215,14 @@ export default function ComposePanel() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 text-sm">
               <span className="text-gray-400">
-                {result.summary.totalTasks} tasks decomposed
+                {result.summary.totalTasks} {t("compose.tasks_decomposed")}
               </span>
               <span className="text-green-400">
-                {result.summary.matched} matched
+                {result.summary.matched} {t("compose.matched")}
               </span>
               {result.summary.unmatched > 0 && (
                 <span className="text-yellow-400">
-                  {result.summary.unmatched} unmatched
+                  {result.summary.unmatched} {t("compose.unmatched")}
                 </span>
               )}
             </div>
@@ -229,7 +231,7 @@ export default function ComposePanel() {
               disabled={executing || result.summary.matched === 0}
               className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 px-6 py-2 rounded-lg text-sm font-medium transition-colors"
             >
-              {executing ? "Executing..." : "Execute Team"}
+              {executing ? t("compose.executing") : t("compose.execute")}
             </button>
           </div>
 
@@ -250,15 +252,25 @@ export default function ComposePanel() {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs text-gray-600 font-mono">{tr.task.id}</span>
-                      <span className="text-sm font-medium text-gray-200">{tr.task.role.replace(/_/g, " ")}</span>
+                      <span className="text-sm font-medium text-gray-200">
+                        {t(`role.${tr.task.role}`) !== `role.${tr.task.role}` ? t(`role.${tr.task.role}`) : tr.task.role.replace(/_/g, " ")}
+                      </span>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded ${matchStyle.bg} ${matchStyle.text}`}>
                       {matchStyle.label}
                     </span>
                   </div>
 
+                  {/* Role description */}
+                  {t(`role.${tr.task.role}.desc`) !== `role.${tr.task.role}.desc` && (
+                    <p className="text-xs text-gray-600 mb-2">{t(`role.${tr.task.role}.desc`)}</p>
+                  )}
+
                   {/* Action */}
-                  <p className="text-sm text-gray-400 mb-3">{tr.task.action}</p>
+                  <p className="text-sm text-gray-400 mb-2">{tr.task.action}</p>
+
+                  {/* Match type explanation */}
+                  <p className="text-xs text-gray-700 mb-3">{t(`match.${tr.match.matchType}`)}</p>
 
                   {/* Matched Agent */}
                   {tr.match.agent ? (
@@ -269,7 +281,7 @@ export default function ComposePanel() {
                     </div>
                   ) : (
                     <div className="text-sm text-yellow-500">
-                      No agent matched
+                      {t("compose.no_match")}
                       {tr.match.candidates && tr.match.candidates.length > 0 && (
                         <span className="text-gray-500 ml-2">
                           candidates: {tr.match.candidates.slice(0, 3).map((c) => c.name).join(", ")}

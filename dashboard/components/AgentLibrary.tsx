@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "@/lib/locale-context";
 
 interface Agent {
   name: string;
@@ -28,6 +29,7 @@ const SOURCE_BADGE: Record<string, { label: string; color: string }> = {
 };
 
 export default function AgentLibrary() {
+  const { t } = useLocale();
   const [data, setData] = useState<AgentsResponse | null>(null);
   const [filter, setFilter] = useState("");
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
@@ -43,8 +45,8 @@ export default function AgentLibrary() {
       .catch((err) => setError(err.message));
   }, []);
 
-  if (error) return <div className="text-red-400">Failed to load agents: {error}</div>;
-  if (!data) return <div className="text-gray-500">Loading agents...</div>;
+  if (error) return <div className="text-red-400">{t("agents.load_error")}: {error}</div>;
+  if (!data) return <div className="text-gray-500">{t("agents.loading")}</div>;
 
   const filteredDivisions = data.divisions
     .filter((d) => !selectedDivision || d.name === selectedDivision)
@@ -64,7 +66,7 @@ export default function AgentLibrary() {
       <div className="flex items-center gap-4 mb-6">
         <input
           type="text"
-          placeholder="Search agents..."
+          placeholder={t("agents.search")}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm w-64 focus:outline-none focus:border-gray-500"
@@ -74,14 +76,14 @@ export default function AgentLibrary() {
           onChange={(e) => setSelectedDivision(e.target.value || null)}
           className="bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:border-gray-500"
         >
-          <option value="">All Divisions</option>
+          <option value="">{t("agents.all_divisions")}</option>
           {data.divisions.map((d) => (
             <option key={d.name} value={d.name}>
               {d.label} ({d.agents.length})
             </option>
           ))}
         </select>
-        <span className="text-sm text-gray-500">Total: {data.total} agents</span>
+        <span className="text-sm text-gray-500">{t("agents.total")}: {data.total}</span>
       </div>
 
       {filteredDivisions.map((division) => (
