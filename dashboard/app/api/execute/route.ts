@@ -16,7 +16,7 @@ interface ExecResult {
 function runClaude(prompt: string, cwd: string, timeoutMs: number = 600000): Promise<{ success: boolean; output: string; error?: string; durationMs: number }> {
   return new Promise((resolve) => {
     const start = Date.now();
-    const proc = spawn("claude", ["--print", "--dangerously-skip-permissions", "-m", prompt], {
+    const proc = spawn("claude", ["-p", "--dangerously-skip-permissions", prompt], {
       cwd,
       shell: false,
       timeout: timeoutMs,

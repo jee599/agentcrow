@@ -39,7 +39,7 @@ export class ClaudeCLIBridge {
   private runClaude(prompt: string, workingDir?: string): Promise<BridgeResult> {
     return new Promise((resolve, reject) => {
       const start = Date.now();
-      const args = ['--print', '--dangerously-skip-permissions', '-m', prompt];
+      const args = ['-p', '--dangerously-skip-permissions', prompt];
 
       const proc = spawn('claude', args, {
         cwd: workingDir || process.cwd(),
