@@ -27,6 +27,7 @@ export default function RootLayout({
     <html lang="ko" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-950 text-gray-100 min-h-screen`}
+        suppressHydrationWarning
       >
         <nav className="border-b border-gray-800 px-6 py-3">
           <div className="flex items-center gap-6">
