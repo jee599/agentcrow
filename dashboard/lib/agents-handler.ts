@@ -22,21 +22,21 @@ export interface AgentsResponse {
 }
 
 const DIVISION_LABELS: Record<string, string> = {
-  builtin: "커스텀 에이전트",
-  engineering: "Engineering Division",
-  design: "Design Division",
-  "game-development": "Game Development Division",
-  marketing: "Marketing Division",
-  sales: "Sales Division",
-  product: "Product Division",
-  "project-management": "Project Management Division",
-  testing: "Testing Division",
-  support: "Support Division",
-  strategy: "Strategy Division",
-  specialized: "Specialized Division",
-  "paid-media": "Paid Media Division",
-  "spatial-computing": "Spatial Computing Division",
-  academic: "Academic Division",
+  builtin: "Custom Agents",
+  engineering: "Engineering",
+  design: "Design",
+  "game-development": "Game Development",
+  marketing: "Marketing",
+  sales: "Sales",
+  product: "Product",
+  "project-management": "Project Management",
+  testing: "Testing",
+  support: "Support",
+  strategy: "Strategy",
+  specialized: "Specialized",
+  "paid-media": "Paid Media",
+  "spatial-computing": "Spatial Computing",
+  academic: "Academic",
 };
 
 let cachedResponse: AgentsResponse | null = null;

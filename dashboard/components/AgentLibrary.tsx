@@ -88,7 +88,7 @@ export default function AgentLibrary() {
           <option value="" className="bg-slate-900">{t("agents.all_divisions")}</option>
           {data.divisions.map((d) => (
             <option key={d.name} value={d.name} className="bg-slate-900">
-              {d.label} ({d.agents.length})
+              {t(`div.${d.label}`) !== `div.${d.label}` ? t(`div.${d.label}`) : d.label} ({d.agents.length})
             </option>
           ))}
         </select>
@@ -102,7 +102,7 @@ export default function AgentLibrary() {
         <div key={division.name} className="mb-5">
           <div className="flex items-center gap-2 mb-1.5 border-b border-slate-700/30 pb-1.5">
             <h2 className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">
-              {division.label}
+              {t(`div.${division.label}`) !== `div.${division.label}` ? t(`div.${division.label}`) : division.label}
             </h2>
             <span className="text-[10px] font-mono text-slate-600">{division.agents.length}</span>
           </div>
@@ -128,7 +128,7 @@ export default function AgentLibrary() {
                   <span className="text-slate-100 w-52 truncate shrink-0">{agent.name}</span>
                   <span className="font-mono text-slate-500 w-44 truncate shrink-0">{agent.role}</span>
                   <span className={`${srcColor} text-[10px] w-24 shrink-0`}>{srcLabel}</span>
-                  <span className="text-slate-600 text-[10px] truncate">{division.label}</span>
+                  <span className="text-slate-600 text-[10px] truncate">{t(`div.${division.label}`) !== `div.${division.label}` ? t(`div.${division.label}`) : division.label}</span>
                 </div>
               );
             })}
