@@ -1,0 +1,21 @@
+{
+  "name": "spoon-compose",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "agents:init": "git submodule update --init --recursive",
+    "agents:update": "git submodule update --remote agents/external/agency-agents",
+    "agents:catalog": "npx tsx src/core/catalog.ts --rebuild",
+    "postinstall": "git submodule update --init --recursive || true"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0",
+    "yaml": "^2.8.2"
+  }
+}
