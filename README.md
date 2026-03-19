@@ -5,8 +5,8 @@
 </h1>
 
 <h3 align="center">
-  You type one prompt. AgentCrow splits it across 144 specialized agents.<br>
-  <code>npx agentcrow init</code> → <code>claude</code> → auto-dispatch.
+  Claude Code Agent Teams is powerful. But it doesn't know <i>which</i> agents to use.<br>
+  AgentCrow does. 144 agents. Auto-dispatch. <code>npx agentcrow init</code>
 </h3>
 
 <p align="center">
@@ -17,6 +17,7 @@
 </p>
 
 <p align="center">
+  <a href="#the-problem">Problem</a> •
   <a href="#install">Install</a> •
   <a href="#how-it-works">How It Works</a> •
   <a href="#agents">Agents</a> •
@@ -28,10 +29,27 @@
 
 ---
 
+<a id="the-problem"></a>
+## 🆚 Agent Teams alone vs. Agent Teams + AgentCrow
+
+| | Agent Teams alone | + AgentCrow |
+|:---|:---:|:---:|
+| Spawn subagents | ✅ | ✅ |
+| Know which agents to use | ❌ you decide | ✅ auto-matched |
+| 144 pre-built agent roles | ❌ you write prompts | ✅ ready to go |
+| Auto-decompose prompts | ❌ you split manually | ✅ one prompt in |
+| Agent identity & rules | ❌ blank subagents | ✅ personality, MUST/MUST NOT |
+| Works without config | ❌ needs `--agents` JSON | ✅ `npx agentcrow init` |
+| 15 divisions (eng, game, design...) | ❌ | ✅ |
+
+> **Agent Teams gives you the engine. AgentCrow gives it a brain.**
+
+---
+
 ```
   You:    "Build a SaaS dashboard with Stripe billing, auth, and docs"
 
-  AgentCrow decomposes → 5 agents:
+  🐦 AgentCrow auto-dispatches 5 agents:
 
     🖥️  frontend_developer  → React dashboard UI, charts, responsive layout
     🏗️  backend_architect   → Auth system, REST API, database schema
@@ -39,7 +57,7 @@
     🧪  qa_engineer         → E2E billing flow tests, auth edge cases
     📝  technical_writer    → API reference, onboarding guide
 
-  Claude dispatches each agent automatically.
+  You didn't pick them. AgentCrow did.
 ```
 
 <h3 align="center">⬇️ One line. That's it.</h3>
