@@ -118,8 +118,18 @@ export async function POST(request: NextRequest) {
         const agentPrompt = [
           `You are ${agent!.name} (${agent!.role}).`,
           "",
+          "[CRITICAL RULES]",
+          "- Do NOT ask questions. Make decisions yourself and proceed.",
+          "- Do NOT ask for confirmation. Just do the work.",
+          "- If you need to choose between options, pick the best one and explain why.",
+          "- Create actual files and write actual code. Do not just describe what to do.",
+          "- Work in the current directory.",
+          "",
           "[Task]",
           task.action,
+          "",
+          `[Project Context]`,
+          `Original request: ${prompt}`,
           "",
           task.file_scope.length > 0 ? `[File Scope]\n${task.file_scope.join(", ")}` : "",
         ].filter(Boolean).join("\n");
