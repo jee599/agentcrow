@@ -27,7 +27,7 @@ function printUsage(): void {
 \x1b[35m🐦 agentcrow\x1b[0m — Auto Agent Router for Claude Code
 
 \x1b[1mUsage:\x1b[0m
-  agentcrow init [--lang ko]         Set up agents in current project (default: English)
+  agentcrow init [--lang ko] [--max 5]  Set up agents (default: English, max 5 per dispatch)
   agentcrow on                       Enable AgentCrow (restore CLAUDE.md)
   agentcrow off                      Disable AgentCrow (backup & remove CLAUDE.md)
   agentcrow status                   Check if AgentCrow is active
@@ -95,39 +95,98 @@ async function ensureGlobalAgents(): Promise<{ builtinDir: string; externalDir: 
 }
 
 // ─── agentcrow init ───
-async function cmdInit(lang: string = 'en'): Promise<void> {
+async function cmdInit(lang: string = 'en', maxAgents: number = 5): Promise<void> {
   const cwd = process.cwd();
 
   // 1. Ensure global agent storage
   const { builtinDir, externalDir, agentCount } = await ensureGlobalAgents();
 
-  // 2. Build catalog for template
+  // 2. Build catalog
   const catalog = new AgentCatalog(builtinDir, externalDir);
   await catalog.build();
 
-  // 3. Generate CLAUDE.md from template
+  // 3. Copy agent .md files to .claude/agents/
   const claudeDir = path.join(cwd, '.claude');
-  fs.mkdirSync(claudeDir, { recursive: true });
+  const agentsDir = path.join(claudeDir, 'agents');
+  fs.mkdirSync(agentsDir, { recursive: true });
+
+  // Generate agent .md files from builtin YAML + external .md
+  const allAgents = catalog.listAll();
+  let agentFiles = 0;
+  for (const entry of allAgents) {
+    const agentMdPath = path.join(agentsDir, `${entry.role}.md`);
+    if (fs.existsSync(agentMdPath)) continue;
+
+    if (entry.source.type === 'builtin') {
+      // Parse YAML → generate agent .md
+      const yamlPath = (entry.source as { filePath: string }).filePath;
+      if (fs.existsSync(yamlPath)) {
+        const yaml = await import('yaml');
+        const parsed = yaml.parse(fs.readFileSync(yamlPath, 'utf-8'));
+        const md = [
+          `# ${parsed.name}`,
+          `> ${parsed.description || ''}`,
+          '',
+          `**Role:** ${parsed.role}`,
+          '',
+          parsed.identity?.personality ? `## Identity\n${parsed.identity.personality.trim()}` : '',
+          parsed.critical_rules?.must?.length ? `## MUST\n${parsed.critical_rules.must.map((r: string) => `- ${r}`).join('\n')}` : '',
+          parsed.critical_rules?.must_not?.length ? `## MUST NOT\n${parsed.critical_rules.must_not.map((r: string) => `- ${r}`).join('\n')}` : '',
+        ].filter(Boolean).join('\n\n');
+        fs.writeFileSync(agentMdPath, md, 'utf-8');
+        agentFiles++;
+      }
+    } else if (entry.source.type === 'external') {
+      // Symlink or copy external .md
+      const srcPath = (entry.source as { filePath: string }).filePath;
+      if (fs.existsSync(srcPath)) {
+        try {
+          fs.symlinkSync(srcPath, agentMdPath);
+        } catch {
+          fs.copyFileSync(srcPath, agentMdPath);
+        }
+        agentFiles++;
+      }
+    }
+  }
+  console.log(`  ${agentFiles > 0 ? `Installed ${agentFiles}` : `${allAgents.length}`} agent definitions → .claude/agents/`);
+
+  // 4. Generate slim CLAUDE.md (rules only, no agent list)
   const claudeMdPath = path.join(claudeDir, 'CLAUDE.md');
 
-  const templatePath = getTemplatePath(lang);
-  let template = fs.readFileSync(templatePath, 'utf-8');
-  template = template.replace('{{count}}', String(agentCount));
+  const agentCrowSection = `${AGENTCROW_START}
+# AgentCrow — Auto Agent Dispatch
 
-  const grouped = catalog.listByDivision();
-  const builtinList = (grouped['builtin'] ?? [])
-    .map((e) => `- **${e.role}**: ${e.name}. ${e.description}`)
-    .join('\n');
-  template = template.replace('{{builtin_agents}}', builtinList || '(none)');
+${lang === 'ko'
+  ? `## 규칙
+1. 복잡한 요청(2개 이상 작업)을 받으면 .claude/agents/에서 적합한 에이전트를 찾아 Agent 도구로 dispatch해라.
+2. 한 번에 최대 **${maxAgents}개** 에이전트까지 dispatch한다. 그 이상 필요하면 우선순위가 높은 ${maxAgents}개만 선택해라.
+3. 독립적인 태스크는 병렬로, 의존성 있는 건 순차로 dispatch해라.
+4. 질문하지 마라. 스스로 판단하고 진행해라.
+5. dispatch 전에 계획을 먼저 보여줘라:
+   \`\`\`
+   🐦 AgentCrow — N개 에이전트 분배:
+   1. @agent_role → "할 일"
+   2. @agent_role → "할 일"
+   \`\`\`
+6. 단순한 요청(버그 수정, 파일 수정 등)은 에이전트 없이 직접 처리해라.`
+  : `## Rules
+1. For complex requests (2+ tasks), find matching agents from .claude/agents/ and dispatch them using the Agent tool.
+2. Dispatch at most **${maxAgents} agents** at a time. If more are needed, pick the top ${maxAgents} by priority.
+3. Dispatch independent tasks in parallel, dependent ones sequentially.
+4. Do not ask questions. Make decisions and proceed.
+5. Before dispatching, show the plan:
+   \`\`\`
+   🐦 AgentCrow — dispatching N agents:
+   1. @agent_role → "task description"
+   2. @agent_role → "task description"
+   \`\`\`
+6. Simple requests (bug fixes, single file edits) — handle directly, no agents needed.`}
 
-  const countSuffix = lang === 'ko' ? '개' : '';
-  const externalDivisions = Object.entries(grouped)
-    .filter(([div]) => div !== 'builtin')
-    .map(([div, entries]) => `- **${div}**: ${entries.map((e) => e.role).join(', ')} (${entries.length}${countSuffix})`)
-    .join('\n');
-  template = template.replace('{{external_agents}}', externalDivisions || '(none)');
+## Agents: ${allAgents.length} available in .claude/agents/
+${AGENTCROW_END}`;
 
-  // 4. Merge with existing CLAUDE.md
+  // 5. Merge
   if (fs.existsSync(claudeMdPath)) {
     const existing = fs.readFileSync(claudeMdPath, 'utf-8');
     const startIdx = existing.indexOf(AGENTCROW_START);
@@ -136,27 +195,26 @@ async function cmdInit(lang: string = 'en'): Promise<void> {
     if (startIdx !== -1 && endIdx !== -1) {
       const before = existing.slice(0, startIdx);
       const after = existing.slice(endIdx + AGENTCROW_END.length);
-      fs.writeFileSync(claudeMdPath, before + template + after, 'utf-8');
-      console.log(`  Updated AgentCrow section in CLAUDE.md (${agentCount} agents)`);
+      fs.writeFileSync(claudeMdPath, before + agentCrowSection + after, 'utf-8');
+      console.log(`  Updated AgentCrow section in CLAUDE.md`);
     } else if (existing.includes('AgentCrow')) {
-      fs.writeFileSync(claudeMdPath, template, 'utf-8');
-      console.log(`  Replaced CLAUDE.md (${agentCount} agents)`);
+      fs.writeFileSync(claudeMdPath, agentCrowSection, 'utf-8');
+      console.log(`  Replaced CLAUDE.md`);
     } else {
-      fs.writeFileSync(claudeMdPath, existing + '\n\n---\n\n' + template, 'utf-8');
-      console.log(`  Merged AgentCrow into existing CLAUDE.md (${agentCount} agents)`);
+      fs.writeFileSync(claudeMdPath, existing + '\n\n---\n\n' + agentCrowSection, 'utf-8');
+      console.log(`  Merged AgentCrow into existing CLAUDE.md`);
     }
   } else {
-    fs.writeFileSync(claudeMdPath, template, 'utf-8');
-    console.log(`  Generated CLAUDE.md (${agentCount} agents)`);
+    fs.writeFileSync(claudeMdPath, agentCrowSection, 'utf-8');
+    console.log(`  Generated CLAUDE.md`);
   }
 
-  // 5. Install hook
+  // 6. Install hook
   installHook(cwd);
   console.log('  Installed SessionStart hook');
 
   console.log();
-  console.log('\x1b[32m✓ AgentCrow initialized.\x1b[0m Run `claude` and it will auto-dispatch agents.');
-  console.log('\x1b[90m  Agents stored globally at ~/.agentcrow/ (shared across projects)\x1b[0m');
+  console.log(`\x1b[32m✓ AgentCrow initialized.\x1b[0m ${allAgents.length} agents in .claude/agents/, max ${maxAgents} per dispatch.`);
   console.log('\x1b[90m  agentcrow off / on / status\x1b[0m');
 }
 
@@ -431,7 +489,9 @@ async function main(): Promise<void> {
     case 'init': {
       const langIdx = args.indexOf('--lang');
       const lang = langIdx !== -1 && args[langIdx + 1] ? args[langIdx + 1] : 'en';
-      await cmdInit(lang);
+      const maxIdx = args.indexOf('--max');
+      const maxAgents = maxIdx !== -1 && args[maxIdx + 1] ? parseInt(args[maxIdx + 1], 10) : 5;
+      await cmdInit(lang, maxAgents);
       break;
     }
 
