@@ -3,7 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "bin": {
+    "agentcrow": "./bin/agentcrow"
+  },
   "scripts": {
+    "agentcrow": "npx tsx bin/agentcrow.ts",
     "build": "tsc",
     "test": "vitest run",
     "test:watch": "vitest",
