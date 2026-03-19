@@ -26,14 +26,15 @@
 ---
 
 ```
-  你:    "做一个皮卡丘排球多人对战游戏"
+  你:    "做一个AI股票分析工具，能爬取数据、分析趋势、生成报告"
 
-  AgentCrow 自动分解 → 4 个 Agent:
+  AgentCrow 自动分解 → 5 个 Agent:
 
-    🎮 game_designer       → 游戏机制、物理引擎、计分系统
-    🖥️ frontend_developer   → Canvas 渲染、游戏循环、输入处理
-    🏗️ backend_architect    → WebSocket 服务器、匹配系统
-    🧪 qa_engineer          → 物理测试、同步测试、E2E
+    🤖  ai_engineer         → 趋势预测模型、情感分析
+    📊  data_pipeline_eng   → 股票API爬取、数据清洗、存储
+    🖥️  frontend_developer  → 图表仪表盘、实时行情UI
+    🏗️  backend_architect   → 数据API、用户认证、报告生成
+    🧪  qa_engineer         → 数据准确性测试、API压力测试
 
   Claude 自动调度每个 Agent。
 ```

@@ -26,14 +26,15 @@
 ---
 
 ```
-  나:    "피카츄 배구 멀티로 만들어줘"
+  나:    "커피챗 앱 만들어줘. 매칭 알고리즘이랑 채팅이랑 배포까지"
 
-  AgentCrow가 분해 → 에이전트 4개:
+  AgentCrow가 분해 → 에이전트 5개:
 
-    🎮 game_designer       → 게임 메커닉, 물리, 점수 시스템
-    🖥️ frontend_developer   → Canvas 렌더링, 게임 루프, 입력 처리
-    🏗️ backend_architect    → WebSocket 서버, 매치메이킹
-    🧪 qa_engineer          → 물리 테스트, 동기화 테스트, E2E
+    🖥️  frontend_developer  → Next.js 채팅 UI, 프로필 카드, 매칭 화면
+    🏗️  backend_architect   → 매칭 알고리즘, WebSocket 채팅 서버
+    🤖  ai_engineer         → 관심사 기반 매칭 추천 로직
+    🧪  qa_engineer         → 매칭/채팅 E2E 테스트
+    🚀  devops_automator    → Docker + CI/CD 파이프라인
 
   Claude가 각 에이전트를 자동으로 디스패치한다.
 ```

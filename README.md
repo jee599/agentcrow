@@ -29,14 +29,15 @@
 ---
 
 ```
-  You:    "피카츄 배구 멀티로 만들어줘"
+  You:    "Build a SaaS dashboard with Stripe billing, auth, and docs"
 
-  AgentCrow decomposes → 4 agents:
+  AgentCrow decomposes → 5 agents:
 
-    🎮 game_designer       → game mechanics, physics, scoring
-    🖥️ frontend_developer   → Canvas rendering, game loop, input
-    🏗️ backend_architect    → WebSocket server, matchmaking
-    🧪 qa_engineer          → physics tests, sync tests, E2E
+    🖥️  frontend_developer  → React dashboard UI, charts, responsive layout
+    🏗️  backend_architect   → Auth system, REST API, database schema
+    💳  backend_architect   → Stripe integration, webhook handlers
+    🧪  qa_engineer         → E2E billing flow tests, auth edge cases
+    📝  technical_writer    → API reference, onboarding guide
 
   Claude dispatches each agent automatically.
 ```
@@ -172,14 +173,14 @@ npx agentcrow compose "prompt"  # Preview decomposition (dry run)
 ## 💡 Example Prompts
 
 ```
-React로 로그인 만들고 API 연동하고 테스트하고 문서 작성해줘
-→ frontend_developer + backend_architect + qa_engineer + korean_tech_writer
+Build an AI-powered news aggregator with crawling and email alerts
+→ ai_engineer + data_pipeline_engineer + frontend_developer + devops_automator
 
-Build a real-time chat app with WebSocket and deploy to Docker
-→ frontend_developer + backend_architect + devops_automator + qa_engineer
+E-commerce site with Stripe, inventory management, and admin panel
+→ frontend_developer + backend_architect + ui_designer + qa_engineer
 
-ゲームのマッチメイキングシステムを設計して実装して
-→ game_designer + backend_architect + qa_engineer
+Open source CLI tool with tests, docs, and CI/CD pipeline
+→ frontend_developer + qa_engineer + technical_writer + devops_automator
 ```
 
 Simple prompts run normally. AgentCrow only activates for multi-task requests.

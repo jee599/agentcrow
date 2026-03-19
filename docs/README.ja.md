@@ -26,14 +26,14 @@
 ---
 
 ```
-  あなた:  "ピカチュウバレーをマルチプレイヤーで作って"
+  あなた:  "ブログプラットフォームを作って。Markdown対応、コメント、RSS付きで"
 
   AgentCrowが分解 → エージェント4つ:
 
-    🎮 game_designer       → ゲームメカニクス、物理演算、スコアリング
-    🖥️ frontend_developer   → Canvas描画、ゲームループ、入力処理
-    🏗️ backend_architect    → WebSocketサーバー、マッチメイキング
-    🧪 qa_engineer          → 物理テスト、同期テスト、E2E
+    🖥️  frontend_developer  → Next.js MDXレンダリング、コメントUI
+    🏗️  backend_architect   → 記事API、認証、コメントシステム
+    🎨  ui_designer         → レスポンシブレイアウト、ダークモード
+    🧪  qa_engineer         → Markdown変換テスト、RSS検証
 
   Claudeが各エージェントを自動的にディスパッチします。
 ```
