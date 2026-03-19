@@ -187,7 +187,7 @@ npx agentcrow compose "prompt"  # Apercu de la decomposition (dry run)
 Construire un systeme de reservation avec paiement et notifications
 → frontend_developer + backend_architect + ui_designer + qa_engineer
 
-Build a real-time chat app with WebSocket and deploy to Docker
+Marketplace de freelances avec profils, messagerie et paiements
 → frontend_developer + backend_architect + devops_automator + qa_engineer
 
 Plateforme de gestion de projet avec Kanban, suivi du temps et rapports

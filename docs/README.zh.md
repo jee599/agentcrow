@@ -172,6 +172,7 @@ npx agentcrow init
 ```bash
 npx agentcrow init              # 设置 Agent + CLAUDE.md（默认英文）
 npx agentcrow init --lang ko    # 韩文模板
+npx agentcrow init --max 5      # 每次调度最大 Agent 数
 npx agentcrow status            # 检查是否激活
 npx agentcrow off               # 临时禁用
 npx agentcrow on                # 重新启用
@@ -183,14 +184,14 @@ npx agentcrow compose "prompt"  # 预览分解（dry run）
 ## 💡 Prompt 示例
 
 ```
-React로 로그인 만들고 API 연동하고 테스트하고 문서 작성해줘
-→ frontend_developer + backend_architect + qa_engineer + korean_tech_writer
+做一个AI股票分析工具，能爬取数据、分析趋势、生成报告
+→ ai_engineer + data_pipeline_engineer + frontend_developer + backend_architect
 
-Build a real-time chat app with WebSocket and deploy to Docker
-→ frontend_developer + backend_architect + devops_automator + qa_engineer
+在线教育平台，支持视频课程、测验和证书
+→ frontend_developer + backend_architect + ai_engineer + qa_engineer
 
-ゲームのマッチメイキングシステムを設計して実装して
-→ game_designer + backend_architect + qa_engineer
+社区论坛系统，支持帖子、评论、搜索和用户等级
+→ frontend_developer + backend_architect + ui_designer + qa_engineer
 ```
 
 简单的 prompt 会正常运行，AgentCrow 只在多任务请求时才会介入。

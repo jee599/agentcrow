@@ -359,7 +359,7 @@ Output ONLY a JSON array: [{"role":"role_name","action":"specific task"}]
       out += d.toString();
     });
 
-    proc.on('close', (code) => {
+    proc.on('close', (_code) => {
       try {
         const match = out.match(/\[[\s\S]*\]/);
         if (match) {

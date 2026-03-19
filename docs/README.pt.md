@@ -187,7 +187,7 @@ npx agentcrow compose "prompt"  # Pre-visualizar decomposicao (dry run)
 Criar um sistema de agendamento com notificacoes e dashboard
 → frontend_developer + backend_architect + ui_designer + qa_engineer
 
-Build a real-time chat app with WebSocket and deploy to Docker
+App de delivery com rastreamento em tempo real, pagamentos e notificacoes
 → frontend_developer + backend_architect + devops_automator + qa_engineer
 
 Plataforma de e-learning com video aulas, quizzes e certificados

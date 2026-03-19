@@ -171,6 +171,7 @@ APIキー不要。サーバー不要。Claude Code + CLAUDE.md、それだけで
 ```bash
 npx agentcrow init              # エージェント + CLAUDE.md セットアップ（英語デフォルト）
 npx agentcrow init --lang ko    # 韓国語テンプレート
+npx agentcrow init --max 5      # ディスパッチあたりの最大エージェント数
 npx agentcrow status            # アクティブか確認
 npx agentcrow off               # 一時的に無効化
 npx agentcrow on                # 再有効化
@@ -182,14 +183,14 @@ npx agentcrow compose "prompt"  # 分解プレビュー（dry run）
 ## 💡 プロンプト例
 
 ```
-React로 로그인 만들고 API 연동하고 테스트하고 문서 작성해줘
-→ frontend_developer + backend_architect + qa_engineer + korean_tech_writer
-
-Build a real-time chat app with WebSocket and deploy to Docker
-→ frontend_developer + backend_architect + devops_automator + qa_engineer
+ブログプラットフォームを作って。Markdown対応、コメント、RSS付きで
+→ frontend_developer + backend_architect + ui_designer + qa_engineer
 
 ゲームのマッチメイキングシステムを設計して実装して
 → game_designer + backend_architect + qa_engineer
+
+レシピ共有アプリを作って。画像アップロード、検索、お気に入り機能付き
+→ frontend_developer + backend_architect + ui_designer + qa_engineer
 ```
 
 シンプルなプロンプトは通常通り動作します。AgentCrowはマルチタスクリクエストの場合のみ起動します。

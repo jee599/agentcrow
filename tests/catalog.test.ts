@@ -15,7 +15,7 @@ describe('AgentCatalog', () => {
     await catalog.build();
   });
 
-  it('builtin 에이전트 8개가 로드된다', () => {
+  it('builtin 에이전트 9개가 로드된다', () => {
     const builtins = catalog.listAll().filter(e => e.source.type === 'builtin');
     expect(builtins).toHaveLength(9);
   });
@@ -36,7 +36,7 @@ describe('AgentCatalog', () => {
     expect(results[0].entry.role).toBe('security_auditor_deep');
   });
 
-  it('listByDivision: builtin has 8', () => {
+  it('listByDivision: builtin has 9', () => {
     const grouped = catalog.listByDivision();
     expect(grouped['builtin']).toBeDefined();
     expect(grouped['builtin'].length).toBe(9);

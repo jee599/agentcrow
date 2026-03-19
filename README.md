@@ -193,6 +193,7 @@ No API key. No server. Just Claude Code + CLAUDE.md.
 ```bash
 npx agentcrow init              # Set up agents + CLAUDE.md (English default)
 npx agentcrow init --lang ko    # Korean template
+npx agentcrow init --max 5      # Max simultaneous agents per dispatch
 npx agentcrow status            # Check if active
 npx agentcrow off               # Disable temporarily
 npx agentcrow on                # Re-enable

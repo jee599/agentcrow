@@ -187,7 +187,7 @@ npx agentcrow compose "prompt"  # Xem truoc phan tach (dry run)
 Xây dựng nền tảng tuyển dụng với AI matching và chat
 → frontend_developer + backend_architect + ai_engineer + qa_engineer
 
-Build a real-time chat app with WebSocket and deploy to Docker
+Nen tang hoc truc tuyen voi video bai giang, bai kiem tra va chung chi
 → frontend_developer + backend_architect + devops_automator + qa_engineer
 
 He thong quan ly kho hang voi bao cao va canh bao

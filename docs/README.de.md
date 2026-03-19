@@ -187,7 +187,7 @@ npx agentcrow compose "prompt"  # Zerlegungsvorschau (Dry Run)
 Erstelle ein CRM mit Kundenverwaltung, Berichten und API
 → frontend_developer + backend_architect + ui_designer + qa_engineer
 
-Build a real-time chat app with WebSocket and deploy to Docker
+Rezepte-App mit Bildupload, Suche und Bewertungssystem erstellen
 → frontend_developer + backend_architect + devops_automator + qa_engineer
 
 Projektmanagement-Tool mit Kanban-Board, Zeiterfassung und Reporting

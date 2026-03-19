@@ -187,7 +187,7 @@ npx agentcrow compose "prompt"  # Vista previa de descomposicion (dry run)
 Crear una tienda online con carrito, pagos y panel admin
 → frontend_developer + backend_architect + ui_designer + qa_engineer
 
-Build a real-time chat app with WebSocket and deploy to Docker
+App de delivery con seguimiento en tiempo real, pagos y notificaciones
 → frontend_developer + backend_architect + devops_automator + qa_engineer
 
 Sistema de gestion de inventario con reportes y alertas

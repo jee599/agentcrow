@@ -187,7 +187,7 @@ npx agentcrow compose "prompt"  # Ayristirma onizlemesi (dry run)
 Gerçek zamanlı sohbet uygulaması yap, bildirimler ve dosya paylaşımı ile
 → frontend_developer + backend_architect + ui_designer + qa_engineer
 
-Build a real-time chat app with WebSocket and deploy to Docker
+Online egitim platformu yap, video dersler, quizler ve sertifikalar ile
 → frontend_developer + backend_architect + devops_automator + qa_engineer
 
 E-ticaret sitesi yap, stok yonetimi ve admin paneli ile

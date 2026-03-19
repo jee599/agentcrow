@@ -172,6 +172,7 @@ API 키 필요 없다. 서버 필요 없다. Claude Code + CLAUDE.md, 그게 전
 ```bash
 npx agentcrow init              # 에이전트 + CLAUDE.md 설정 (영어 기본)
 npx agentcrow init --lang ko    # 한국어 템플릿
+npx agentcrow init --max 5      # 디스패치당 최대 에이전트 수
 npx agentcrow status            # 활성화 상태 확인
 npx agentcrow off               # 임시 비활성화
 npx agentcrow on                # 다시 활성화
@@ -183,14 +184,14 @@ npx agentcrow compose "prompt"  # 분해 미리보기 (dry run)
 ## 💡 프롬프트 예시
 
 ```
+커피챗 앱 만들어줘. 매칭 알고리즘이랑 채팅이랑 배포까지
+→ frontend_developer + backend_architect + ai_engineer + devops_automator
+
 React로 로그인 만들고 API 연동하고 테스트하고 문서 작성해줘
 → frontend_developer + backend_architect + qa_engineer + korean_tech_writer
 
-Build a real-time chat app with WebSocket and deploy to Docker
-→ frontend_developer + backend_architect + devops_automator + qa_engineer
-
-ゲームのマッチメイキングシステムを設計して実装して
-→ game_designer + backend_architect + qa_engineer
+사주 분석 서비스 만들어줘. 입력 폼, API, 결과 페이지까지
+→ frontend_developer + backend_architect + ai_engineer + qa_engineer
 ```
 
 단순한 프롬프트는 평소처럼 동작한다. AgentCrow는 멀티 태스크 요청에만 개입한다.

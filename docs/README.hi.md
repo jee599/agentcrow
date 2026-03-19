@@ -187,7 +187,7 @@ npx agentcrow compose "prompt"  # डीकंपोज़िशन प्री
 एक फ़ूड डिलीवरी ऐप बनाओ ट्रैकिंग और पेमेंट के साथ
 → frontend_developer + backend_architect + ui_designer + qa_engineer
 
-Build a real-time chat app with WebSocket and deploy to Docker
+ऑनलाइन शिक्षा प्लेटफ़ॉर्म बनाओ वीडियो कोर्स, क्विज़ और सर्टिफ़िकेट के साथ
 → frontend_developer + backend_architect + devops_automator + qa_engineer
 
 इन्वेंटरी मैनेजमेंट सिस्टम बनाओ रिपोर्ट्स और अलर्ट्स के साथ
