@@ -78,8 +78,8 @@ export class AgentCatalog {
         if (entry.description.toLowerCase().includes(q)) score += 1;
       }
 
-      // External source bonus
-      if (entry.source.type === 'external') {
+      // External source bonus (only if there's already a match)
+      if (score > 0 && entry.source.type === 'external') {
         score += 0.1;
       }
 
