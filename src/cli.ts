@@ -365,9 +365,40 @@ function installHook(cwd: string): void {
   }
 
   if (!settings.hooks) settings.hooks = {};
+  // Find the hook script — try npx location first, then local
+  const hookScript = `node -e "
+const fs=require('fs'),p=require('path');
+const d=p.join(process.cwd(),'.agr','agents','builtin');
+if(!fs.existsSync(d)){process.exit(0)}
+const f=fs.readdirSync(d).filter(x=>x.endsWith('.yaml'));
+const r=f.map(x=>x.replace('.yaml','').replace(/-/g,'_'));
+const line='─'.repeat(50);
+console.log('\\x1b[35m🐦 AgentCrow active\\x1b[0m');
+console.log('\\x1b[90m'+line+'\\x1b[0m');
+console.log('\\x1b[90m'+f.length+' builtin agents:\\x1b[0m');
+r.forEach(x=>console.log('\\x1b[90m  · '+x+'\\x1b[0m'));
+const e=p.join(process.cwd(),'.agr','agents','external','agency-agents');
+if(fs.existsSync(e)){
+  const skip=new Set(['scripts','integrations','examples','.github','.git']);
+  let c=0,divs=[];
+  fs.readdirSync(e,{withFileTypes:true}).forEach(x=>{
+    if(!x.isDirectory()||skip.has(x.name))return;
+    divs.push(x.name);
+    const walk=d=>{fs.readdirSync(d,{withFileTypes:true}).forEach(y=>{
+      if(y.isDirectory())walk(p.join(d,y.name));
+      else if(y.name.endsWith('.md')&&y.name!=='README.md')c++;
+    })};
+    walk(p.join(e,x.name));
+  });
+  console.log('\\x1b[90m'+c+' external agents ('+divs.length+' divisions)\\x1b[0m');
+}
+console.log('\\x1b[90m'+line+'\\x1b[0m');
+console.log('\\x1b[90mComplex prompts → auto agent dispatch\\x1b[0m');
+"`;
+
   settings.hooks.SessionStart = [{
     type: 'command',
-    command: `echo '🐦 AgentCrow active — agents ready for dispatch'`,
+    command: hookScript,
   }];
 
   fs.writeFileSync(settingsFile, JSON.stringify(settings, null, 2), 'utf-8');

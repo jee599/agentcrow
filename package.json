@@ -1,6 +1,6 @@
 {
   "name": "agentcrow",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Auto Agent Router — 181 agents, auto-decompose prompts, dispatch subagents in Claude Code",
   "bin": {
     "agentcrow": "./dist/cli.js"
