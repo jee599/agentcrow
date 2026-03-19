@@ -515,8 +515,11 @@ function removeHook(cwd: string): void {
   try {
     const settings = JSON.parse(fs.readFileSync(settingsFile, 'utf-8'));
     if (settings.hooks?.SessionStart) {
-      delete settings.hooks.SessionStart;
-      if (Object.keys(settings.hooks).length === 0) delete settings.hooks;
+      settings.hooks.SessionStart = settings.hooks.SessionStart.filter(
+        (h: { command?: string }) => !h.command?.includes('AgentCrow'),
+      );
+      if (settings.hooks.SessionStart.length === 0) delete settings.hooks.SessionStart;
+      if (settings.hooks && Object.keys(settings.hooks).length === 0) delete settings.hooks;
     }
     fs.writeFileSync(settingsFile, JSON.stringify(settings, null, 2), 'utf-8');
   } catch {}
@@ -550,7 +553,11 @@ async function main(): Promise<void> {
       break;
 
     case 'agents':
-      if (args[1] === 'search' && args[2]) {
+      if (args[1] === 'search') {
+        if (!args[2]) {
+          console.error('Usage: agentcrow agents search <query>');
+          process.exit(1);
+        }
         await cmdAgentsSearch(args.slice(2).join(' '));
       } else {
         await cmdAgents();
@@ -566,6 +573,10 @@ async function main(): Promise<void> {
       break;
 
     default:
+      if (command) {
+        console.error(`Unknown command: ${command}\n`);
+        process.exitCode = 1;
+      }
       printUsage();
       break;
   }
