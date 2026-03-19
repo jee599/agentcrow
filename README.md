@@ -1,17 +1,17 @@
-# auto-agent-router (agr)
+# agentcrow (agr)
 
 181 agents, auto-decompose prompts, dispatch subagents in Claude Code.
 
 ## Install
 
 ```bash
-npm install -g auto-agent-router
+npm install -g agentcrow
 ```
 
 Or use directly:
 
 ```bash
-npx auto-agent-router init
+npx agentcrow init
 ```
 
 ## Usage
@@ -19,7 +19,7 @@ npx auto-agent-router init
 ### Set up agents in your project
 
 ```bash
-agr init
+agentcrow init
 ```
 
 This will:
@@ -32,21 +32,21 @@ After init, run `claude` and it will automatically decompose complex prompts and
 ### List all agents
 
 ```bash
-agr agents
+agentcrow agents
 ```
 
 ### Search agents
 
 ```bash
-agr agents search frontend
-agr agents search game
-agr agents search security
+agentcrow agents search frontend
+agentcrow agents search game
+agentcrow agents search security
 ```
 
 ### Dry-run prompt decomposition
 
 ```bash
-agr compose "React로 로그인 페이지 만들고 테스트해줘"
+agentcrow compose "React로 로그인 페이지 만들고 테스트해줘"
 ```
 
 Shows which agents would be dispatched without actually running them.
@@ -58,7 +58,7 @@ Shows which agents would be dispatched without actually running them.
 
 ## How it works
 
-1. `agr init` copies agent definitions + generates CLAUDE.md in your project
+1. `agentcrow init` copies agent definitions + generates CLAUDE.md in your project
 2. When you run `claude`, it reads CLAUDE.md and knows how to dispatch agents
 3. Complex prompts are automatically decomposed into tasks
 4. Each task is matched to the best agent and dispatched as a subagent
@@ -67,7 +67,7 @@ Shows which agents would be dispatched without actually running them.
 
 ```
 ├── src/
-│   ├── cli.ts            # CLI entry point (agr command)
+│   ├── cli.ts            # CLI entry point (agentcrow command)
 │   └── core/             # Core engine
 │       ├── types.ts
 │       ├── adapter.ts

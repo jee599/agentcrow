@@ -18,23 +18,23 @@ const TEMPLATE_PATH = path.join(PKG_ROOT, 'templates', 'CLAUDE.md.template');
 
 function printUsage(): void {
   console.log(`
-\x1b[35mauto-agent-router (agr)\x1b[0m — Auto Agent Router for Claude Code
+\x1b[35magentcrow (agr)\x1b[0m — Auto Agent Router for Claude Code
 
 \x1b[1mUsage:\x1b[0m
-  agr init                     Set up agents in current project
-  agr agents                   List all available agents
-  agr agents search <query>    Search agents by keyword
-  agr compose <prompt>         Decompose a prompt (dry run)
+  agentcrow init                     Set up agents in current project
+  agentcrow agents                   List all available agents
+  agentcrow agents search <query>    Search agents by keyword
+  agentcrow compose <prompt>         Decompose a prompt (dry run)
 
 \x1b[1mExamples:\x1b[0m
-  agr init
-  agr agents
-  agr agents search frontend
-  agr compose "React로 로그인 페이지 만들고 테스트해줘"
+  agentcrow init
+  agentcrow agents
+  agentcrow agents search frontend
+  agentcrow compose "React로 로그인 페이지 만들고 테스트해줘"
 `);
 }
 
-// ─── agr init ───
+// ─── agentcrow init ───
 async function cmdInit(): Promise<void> {
   const cwd = process.cwd();
   const agrDir = path.join(cwd, '.agr', 'agents');
@@ -113,10 +113,10 @@ async function cmdInit(): Promise<void> {
   }
 
   console.log();
-  console.log('\x1b[32m✓ AGR initialized.\x1b[0m Run `claude` and it will auto-dispatch agents.');
+  console.log('\x1b[32m✓ AgentCrow initialized.\x1b[0m Run `claude` and it will auto-dispatch agents.');
 }
 
-// ─── agr agents ───
+// ─── agentcrow agents ───
 async function cmdAgents(): Promise<void> {
   const manager = new AgentManager(BUILTIN_DIR, EXTERNAL_DIR);
   await manager.initialize();
@@ -139,7 +139,7 @@ async function cmdAgents(): Promise<void> {
   console.log(`\n\x1b[90mTotal: ${totalCount} agents\x1b[0m`);
 }
 
-// ─── agr agents search ───
+// ─── agentcrow agents search ───
 async function cmdAgentsSearch(query: string): Promise<void> {
   const catalog = new AgentCatalog(BUILTIN_DIR, EXTERNAL_DIR);
   await catalog.build();
@@ -164,7 +164,7 @@ async function cmdAgentsSearch(query: string): Promise<void> {
   console.log(`\n\x1b[90m${results.length} results\x1b[0m`);
 }
 
-// ─── agr compose ───
+// ─── agentcrow compose ───
 async function cmdCompose(prompt: string): Promise<void> {
   const manager = new AgentManager(BUILTIN_DIR, EXTERNAL_DIR);
   await manager.initialize();
@@ -282,7 +282,7 @@ async function main(): Promise<void> {
 
     case 'compose':
       if (!args[1]) {
-        console.error('Usage: agr compose <prompt>');
+        console.error('Usage: agentcrow compose <prompt>');
         process.exit(1);
       }
       await cmdCompose(args.slice(1).join(' '));
