@@ -20,7 +20,15 @@
   <a href="../README.md">English</a> •
   <a href="README.ko.md">한국어</a> •
   <a href="README.ja.md">日本語</a> •
-  中文
+  中文 •
+  <a href="README.es.md">Español</a> •
+  <a href="README.pt.md">Português</a> •
+  <a href="README.de.md">Deutsch</a> •
+  <a href="README.fr.md">Français</a> •
+  <a href="README.ru.md">Русский</a> •
+  <a href="README.hi.md">हिन्दी</a> •
+  <a href="README.tr.md">Türkçe</a> •
+  <a href="README.vi.md">Tiếng Việt</a>
 </p>
 
 ---
