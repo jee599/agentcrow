@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "source": "Pikachu Volleyball (1997, SACHI SOFT / Satoshi Takenouchi)",
+    "extractedFrom": "https://github.com/gorisanson/pikachu-volleyball",
+    "note": "Original assets (C) SACHI SOFT / SAWAYAKAN Programmers. For educational/fan project use."
+  },
+  "images": {
+    "spritesheet": {
+      "image": "/assets/images/sprite_sheet.png",
+      "data": "/assets/images/sprite_sheet.json",
+      "format": "TexturePacker JSON",
+      "size": "476x885"
+    },
+    "icon": {
+      "file": "/assets/images/IDI_PIKAICON-0.png",
+      "size": "32x32"
+    }
+  },
+  "sounds": {
+    "pipikachu": {
+      "wav": "/assets/sounds/pipikachu.wav",
+      "m4a": "/assets/sounds/pipikachu.m4a",
+      "description": "Pikachu full cry"
+    },
+    "pika": {
+      "wav": "/assets/sounds/pika.wav",
+      "m4a": "/assets/sounds/pika.m4a",
+      "description": "Pika sound"
+    },
+    "chu": {
+      "wav": "/assets/sounds/chu.wav",
+      "m4a": "/assets/sounds/chu.m4a",
+      "description": "Chu sound"
+    },
+    "pi": {
+      "wav": "/assets/sounds/pi.wav",
+      "m4a": "/assets/sounds/pi.m4a",
+      "description": "Pi sound"
+    },
+    "pikachu": {
+      "wav": "/assets/sounds/pikachu.wav",
+      "m4a": "/assets/sounds/pikachu.m4a",
+      "description": "Pikachu cry"
+    },
+    "powerhit": {
+      "wav": "/assets/sounds/powerhit.wav",
+      "m4a": "/assets/sounds/powerhit.m4a",
+      "description": "Power hit effect"
+    },
+    "ballbounce": {
+      "wav": "/assets/sounds/ballbounce.wav",
+      "m4a": "/assets/sounds/ballbounce.m4a",
+      "description": "Ball bounce effect"
+    },
+    "bgm": {
+      "mp3": "/assets/sounds/bgm.mp3",
+      "description": "Background music"
+    }
+  },
+  "sprites": {
+    "pikachu": {
+      "frames": 20,
+      "size": "64x64",
+      "animations": ["idle", "jump", "dive", "spike"]
+    },
+    "ball": {
+      "frames": 8,
+      "size": "40x40",
+      "animations": ["rotate", "hyper", "trail"]
+    },
+    "background": {
+      "elements": ["sky", "mountain", "cloud", "wave", "ground"]
+    },
+    "objects": {
+      "elements": ["net_pillar", "shadow"]
+    },
+    "ui": {
+      "elements": ["score_digits", "messages", "sitting_pikachu"]
+    }
+  }
+}
