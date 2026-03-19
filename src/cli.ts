@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import * as fs from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
@@ -43,62 +44,68 @@ function printUsage(): void {
 `);
 }
 
+// ─── Global agent storage ───
+const GLOBAL_DIR = path.join(os.homedir(), '.agentcrow', 'agents');
+const GLOBAL_BUILTIN = path.join(GLOBAL_DIR, 'builtin');
+const GLOBAL_EXTERNAL = path.join(GLOBAL_DIR, 'external', 'agency-agents');
+
+async function ensureGlobalAgents(): Promise<{ builtinDir: string; externalDir: string; agentCount: number }> {
+  // 1. Copy builtin agents (from npm package → global)
+  fs.mkdirSync(GLOBAL_BUILTIN, { recursive: true });
+  if (fs.existsSync(BUILTIN_DIR)) {
+    const files = fs.readdirSync(BUILTIN_DIR).filter((f) => f.endsWith('.yaml'));
+    let copied = 0;
+    for (const file of files) {
+      const dest = path.join(GLOBAL_BUILTIN, file);
+      if (!fs.existsSync(dest)) {
+        fs.copyFileSync(path.join(BUILTIN_DIR, file), dest);
+        copied++;
+      }
+    }
+    if (copied > 0) console.log(`  Installed ${copied} builtin agents → ~/.agentcrow/`);
+    else console.log(`  Builtin agents ready (${files.length})`);
+  }
+
+  // 2. Download external agents (once)
+  if (!fs.existsSync(GLOBAL_EXTERNAL)) {
+    fs.mkdirSync(path.join(GLOBAL_DIR, 'external'), { recursive: true });
+    console.log('  Downloading external agents (agency-agents)...');
+    try {
+      const git = spawn('git', ['clone', '--depth', '1', 'https://github.com/msitarzewski/agency-agents.git', GLOBAL_EXTERNAL], {
+        stdio: ['pipe', 'pipe', 'pipe'],
+      });
+      await new Promise<void>((resolve, reject) => {
+        git.on('close', (code) => code === 0 ? resolve() : reject(new Error(`git clone failed: ${code}`)));
+        git.on('error', reject);
+      });
+      const gitDir = path.join(GLOBAL_EXTERNAL, '.git');
+      if (fs.existsSync(gitDir)) fs.rmSync(gitDir, { recursive: true, force: true });
+      console.log('  ✓ Downloaded external agents → ~/.agentcrow/');
+    } catch {
+      console.log('  ⚠ Failed to download external agents (git required). Builtin only.');
+    }
+  } else {
+    console.log('  External agents ready');
+  }
+
+  // 3. Count
+  const catalog = new AgentCatalog(GLOBAL_BUILTIN, GLOBAL_EXTERNAL);
+  await catalog.build();
+  return { builtinDir: GLOBAL_BUILTIN, externalDir: GLOBAL_EXTERNAL, agentCount: catalog.listAll().length };
+}
+
 // ─── agentcrow init ───
 async function cmdInit(lang: string = 'en'): Promise<void> {
   const cwd = process.cwd();
-  const agrDir = path.join(cwd, '.agr', 'agents');
 
-  // 1. Copy builtin agents
-  const agrBuiltinDir = path.join(agrDir, 'builtin');
-  fs.mkdirSync(agrBuiltinDir, { recursive: true });
+  // 1. Ensure global agent storage
+  const { builtinDir, externalDir, agentCount } = await ensureGlobalAgents();
 
-  if (fs.existsSync(BUILTIN_DIR)) {
-    const files = fs.readdirSync(BUILTIN_DIR).filter((f) => f.endsWith('.yaml'));
-    for (const file of files) {
-      fs.copyFileSync(path.join(BUILTIN_DIR, file), path.join(agrBuiltinDir, file));
-    }
-    console.log(`  Copied ${files.length} builtin agents`);
-  }
-
-  // 2. Download external agents (agency-agents)
-  const agrExternalDir = path.join(agrDir, 'external', 'agency-agents');
-  if (!fs.existsSync(agrExternalDir)) {
-    fs.mkdirSync(path.join(agrDir, 'external'), { recursive: true });
-    console.log('  Downloading 172 external agents (agency-agents)...');
-
-    try {
-      const git = spawn('git', ['clone', '--depth', '1', 'https://github.com/msitarzewski/agency-agents.git', agrExternalDir], {
-        stdio: ['pipe', 'pipe', 'pipe'],
-      });
-
-      await new Promise<void>((resolve, reject) => {
-        git.on('close', (code) => {
-          if (code === 0) resolve();
-          else reject(new Error(`git clone failed with code ${code}`));
-        });
-        git.on('error', reject);
-      });
-
-      // Remove .git to save space
-      const gitDir = path.join(agrExternalDir, '.git');
-      if (fs.existsSync(gitDir)) {
-        fs.rmSync(gitDir, { recursive: true, force: true });
-      }
-
-      console.log('  ✓ Downloaded external agents');
-    } catch {
-      console.log('  ⚠ Failed to download external agents (git required). Continuing with builtin only.');
-    }
-  } else {
-    console.log('  External agents already exist, skipping');
-  }
-
-  // 3. Build catalog to count agents
-  const catalog = new AgentCatalog(agrBuiltinDir, path.join(agrDir, 'external', 'agency-agents'));
+  // 2. Build catalog for template
+  const catalog = new AgentCatalog(builtinDir, externalDir);
   await catalog.build();
-  const agentCount = catalog.listAll().length;
 
-  // 4. Generate .claude/CLAUDE.md from template (merge, not overwrite)
+  // 3. Generate CLAUDE.md from template
   const claudeDir = path.join(cwd, '.claude');
   fs.mkdirSync(claudeDir, { recursive: true });
   const claudeMdPath = path.join(claudeDir, 'CLAUDE.md');
@@ -107,7 +114,6 @@ async function cmdInit(lang: string = 'en'): Promise<void> {
   let template = fs.readFileSync(templatePath, 'utf-8');
   template = template.replace('{{count}}', String(agentCount));
 
-  // Fill in agent lists
   const grouped = catalog.listByDivision();
   const builtinList = (grouped['builtin'] ?? [])
     .map((e) => `- **${e.role}**: ${e.name}. ${e.description}`)
@@ -121,60 +127,44 @@ async function cmdInit(lang: string = 'en'): Promise<void> {
     .join('\n');
   template = template.replace('{{external_agents}}', externalDivisions || '(none)');
 
-  // Merge with existing CLAUDE.md instead of overwriting
+  // 4. Merge with existing CLAUDE.md
   if (fs.existsSync(claudeMdPath)) {
     const existing = fs.readFileSync(claudeMdPath, 'utf-8');
     const startIdx = existing.indexOf(AGENTCROW_START);
     const endIdx = existing.indexOf(AGENTCROW_END);
 
     if (startIdx !== -1 && endIdx !== -1) {
-      // Replace existing AgentCrow section
       const before = existing.slice(0, startIdx);
       const after = existing.slice(endIdx + AGENTCROW_END.length);
       fs.writeFileSync(claudeMdPath, before + template + after, 'utf-8');
-      console.log(`  Updated AgentCrow section in .claude/CLAUDE.md (${agentCount} agents)`);
+      console.log(`  Updated AgentCrow section in CLAUDE.md (${agentCount} agents)`);
     } else if (existing.includes('AgentCrow')) {
-      // Old format without markers — replace entirely
       fs.writeFileSync(claudeMdPath, template, 'utf-8');
-      console.log(`  Replaced .claude/CLAUDE.md (${agentCount} agents)`);
+      console.log(`  Replaced CLAUDE.md (${agentCount} agents)`);
     } else {
-      // User has their own CLAUDE.md — append AgentCrow section
-      const merged = existing + '\n\n---\n\n' + template;
-      fs.writeFileSync(claudeMdPath, merged, 'utf-8');
-      console.log(`  Appended AgentCrow section to .claude/CLAUDE.md (${agentCount} agents)`);
+      fs.writeFileSync(claudeMdPath, existing + '\n\n---\n\n' + template, 'utf-8');
+      console.log(`  Merged AgentCrow into existing CLAUDE.md (${agentCount} agents)`);
     }
   } else {
     fs.writeFileSync(claudeMdPath, template, 'utf-8');
-    console.log(`  Generated .claude/CLAUDE.md (${agentCount} agents)`);
+    console.log(`  Generated CLAUDE.md (${agentCount} agents)`);
   }
 
-  // 5. Add .agr/ to .gitignore
-  const gitignorePath = path.join(cwd, '.gitignore');
-  if (fs.existsSync(gitignorePath)) {
-    const content = fs.readFileSync(gitignorePath, 'utf-8');
-    if (!content.includes('.agr/')) {
-      fs.appendFileSync(gitignorePath, '\n.agr/\n');
-      console.log('  Added .agr/ to .gitignore');
-    }
-  } else {
-    fs.writeFileSync(gitignorePath, '.agr/\n', 'utf-8');
-    console.log('  Created .gitignore with .agr/');
-  }
-
-  // 6. Install SessionStart hook
+  // 5. Install hook
   installHook(cwd);
   console.log('  Installed SessionStart hook');
 
   console.log();
   console.log('\x1b[32m✓ AgentCrow initialized.\x1b[0m Run `claude` and it will auto-dispatch agents.');
-  console.log('\x1b[90m  agentcrow off    — disable\x1b[0m');
-  console.log('\x1b[90m  agentcrow on     — re-enable\x1b[0m');
-  console.log('\x1b[90m  agentcrow status — check\x1b[0m');
+  console.log('\x1b[90m  Agents stored globally at ~/.agentcrow/ (shared across projects)\x1b[0m');
+  console.log('\x1b[90m  agentcrow off / on / status\x1b[0m');
 }
 
 // ─── agentcrow agents ───
 async function cmdAgents(): Promise<void> {
-  const manager = new AgentManager(BUILTIN_DIR, EXTERNAL_DIR);
+  const bDir = fs.existsSync(GLOBAL_BUILTIN) ? GLOBAL_BUILTIN : BUILTIN_DIR;
+  const eDir = fs.existsSync(GLOBAL_EXTERNAL) ? GLOBAL_EXTERNAL : EXTERNAL_DIR;
+  const manager = new AgentManager(bDir, eDir);
   await manager.initialize();
 
   const divisions = manager.listAgents();
@@ -197,7 +187,9 @@ async function cmdAgents(): Promise<void> {
 
 // ─── agentcrow agents search ───
 async function cmdAgentsSearch(query: string): Promise<void> {
-  const catalog = new AgentCatalog(BUILTIN_DIR, EXTERNAL_DIR);
+  const bDir = fs.existsSync(GLOBAL_BUILTIN) ? GLOBAL_BUILTIN : BUILTIN_DIR;
+  const eDir = fs.existsSync(GLOBAL_EXTERNAL) ? GLOBAL_EXTERNAL : EXTERNAL_DIR;
+  const catalog = new AgentCatalog(bDir, eDir);
   await catalog.build();
 
   const queryTags = query.split(/[\s,]+/).filter((t) => t.length > 0);
@@ -222,7 +214,9 @@ async function cmdAgentsSearch(query: string): Promise<void> {
 
 // ─── agentcrow compose ───
 async function cmdCompose(prompt: string): Promise<void> {
-  const manager = new AgentManager(BUILTIN_DIR, EXTERNAL_DIR);
+  const bDir = fs.existsSync(GLOBAL_BUILTIN) ? GLOBAL_BUILTIN : BUILTIN_DIR;
+  const eDir = fs.existsSync(GLOBAL_EXTERNAL) ? GLOBAL_EXTERNAL : EXTERNAL_DIR;
+  const manager = new AgentManager(bDir, eDir);
   await manager.initialize();
 
   console.log('\x1b[35mDecomposing prompt...\x1b[0m\n');
@@ -261,7 +255,9 @@ async function cmdCompose(prompt: string): Promise<void> {
 
 // ─── Decompose via claude -p ───
 async function decompose(prompt: string): Promise<Array<{ role: string; action: string }>> {
-  const catalog = new AgentCatalog(BUILTIN_DIR, EXTERNAL_DIR);
+  const bDir = fs.existsSync(GLOBAL_BUILTIN) ? GLOBAL_BUILTIN : BUILTIN_DIR;
+  const eDir = fs.existsSync(GLOBAL_EXTERNAL) ? GLOBAL_EXTERNAL : EXTERNAL_DIR;
+  const catalog = new AgentCatalog(bDir, eDir);
   await catalog.build();
   const allRoles = catalog.listAll().map((e) => e.role);
 
@@ -360,7 +356,7 @@ function cmdOn(): void {
 function cmdStatus(): void {
   const cwd = process.cwd();
   const claudeMd = path.join(cwd, '.claude', 'CLAUDE.md');
-  const agrDir = path.join(cwd, '.agr', 'agents');
+  const agrDir = GLOBAL_DIR;
 
   const hasClaude = fs.existsSync(claudeMd);
   const hasAgr = fs.existsSync(agrDir);
