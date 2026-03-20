@@ -495,12 +495,19 @@ function installHook(cwd: string): void {
   if (!settings.hooks) settings.hooks = {};
   if (!settings.hooks.SessionStart) settings.hooks.SessionStart = [];
 
-  // Check if our hook already exists
-  const hasOurHook = settings.hooks.SessionStart.some((h: { command?: string }) => h.command?.includes('AgentCrow'));
+  // New hook format: { matcher: "", hooks: [{ type, command }] }
+  const hasOurHook = settings.hooks.SessionStart.some((entry: any) => {
+    if (entry.hooks) return entry.hooks.some((h: any) => h.command?.includes('AgentCrow'));
+    if (entry.command) return entry.command.includes('AgentCrow');
+    return false;
+  });
   if (!hasOurHook) {
     settings.hooks.SessionStart.push({
-      type: 'command',
-      command: "echo '🐦 AgentCrow active'",
+      matcher: "",
+      hooks: [{
+        type: 'command',
+        command: "echo '🐦 AgentCrow active'",
+      }],
     });
   }
 
@@ -515,9 +522,11 @@ function removeHook(cwd: string): void {
   try {
     const settings = JSON.parse(fs.readFileSync(settingsFile, 'utf-8'));
     if (settings.hooks?.SessionStart) {
-      settings.hooks.SessionStart = settings.hooks.SessionStart.filter(
-        (h: { command?: string }) => !h.command?.includes('AgentCrow'),
-      );
+      settings.hooks.SessionStart = settings.hooks.SessionStart.filter((entry: any) => {
+        if (entry.hooks) return !entry.hooks.some((h: any) => h.command?.includes('AgentCrow'));
+        if (entry.command) return !entry.command.includes('AgentCrow');
+        return true;
+      });
       if (settings.hooks.SessionStart.length === 0) delete settings.hooks.SessionStart;
       if (settings.hooks && Object.keys(settings.hooks).length === 0) delete settings.hooks;
     }
