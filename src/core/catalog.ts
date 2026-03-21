@@ -70,7 +70,14 @@ export class AgentCatalog {
         const hasExactTag = entry.tags.some((t) => t.toLowerCase() === q);
         if (hasExactTag) {
           score += 2;
-        } else if (entry.tags.some((t) => t.toLowerCase().includes(q) || q.includes(t.toLowerCase()))) {
+        } else if (entry.tags.some((t) => {
+          const tLower = t.toLowerCase();
+          // Word-boundary matching: split by common delimiters and check startsWith
+          const tWords = tLower.split(/[\s_\-]/);
+          const qWords = q.split(/[\s_\-]/);
+          return tWords.some((w) => w.startsWith(q) && q.length >= 3) ||
+                 qWords.some((w) => tLower.startsWith(w) && w.length >= 3);
+        })) {
           score += 1;
         }
         if (entry.role.toLowerCase().includes(q)) score += 3;

@@ -5,7 +5,8 @@ import { AgentCatalog } from '../src/core/catalog';
 
 const BUILTIN_DIR = path.resolve('agents/builtin');
 const EXTERNAL_DIR = path.resolve('agents/external/agency-agents');
-const hasExternal = fs.existsSync(EXTERNAL_DIR);
+const hasExternal = fs.existsSync(EXTERNAL_DIR) &&
+  fs.readdirSync(EXTERNAL_DIR).length > 0;
 
 describe('AgentCatalog', () => {
   let catalog: AgentCatalog;

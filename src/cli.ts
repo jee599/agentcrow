@@ -54,9 +54,18 @@ async function ensureGlobalAgents(): Promise<{ builtinDir: string; externalDir: 
     let copied = 0;
     for (const file of files) {
       const dest = path.join(GLOBAL_BUILTIN, file);
+      const src = path.join(BUILTIN_DIR, file);
       if (!fs.existsSync(dest)) {
-        fs.copyFileSync(path.join(BUILTIN_DIR, file), dest);
+        fs.copyFileSync(src, dest);
         copied++;
+      } else {
+        // Update if source file is different (size changed = content changed)
+        const srcStat = fs.statSync(src);
+        const destStat = fs.statSync(dest);
+        if (srcStat.size !== destStat.size) {
+          fs.copyFileSync(src, dest);
+          copied++;
+        }
       }
     }
     if (copied > 0) console.log(`  Installed ${copied} builtin agents → ~/.agentcrow/`);
@@ -224,15 +233,14 @@ ${AGENTCROW_END}`;
       const startIdx = existing.indexOf(AGENTCROW_START);
       const endIdx = existing.indexOf(AGENTCROW_END);
 
-      if (startIdx !== -1 && endIdx !== -1) {
+      if (startIdx !== -1 && endIdx !== -1 && endIdx > startIdx) {
+        // Both markers found in correct order — replace section
         const before = existing.slice(0, startIdx);
         const after = existing.slice(endIdx + AGENTCROW_END.length);
         fs.writeFileSync(claudeMdPath, before + agentCrowSection + after, 'utf-8');
         console.log(`  Updated AgentCrow section in CLAUDE.md`);
-      } else if (existing.includes('AgentCrow')) {
-        fs.writeFileSync(claudeMdPath, agentCrowSection, 'utf-8');
-        console.log(`  Replaced CLAUDE.md`);
       } else {
+        // No valid markers — append section (preserve existing content)
         fs.writeFileSync(claudeMdPath, existing + '\n\n---\n\n' + agentCrowSection, 'utf-8');
         console.log(`  Merged AgentCrow into existing CLAUDE.md`);
       }
@@ -369,9 +377,6 @@ Output ONLY a JSON array: [{"role":"role_name","action":"specific task"}]
 
   return new Promise((resolve, reject) => {
     const env = { ...process.env };
-    // Remove ANTHROPIC_API_KEY to force Claude CLI to use OAuth auth
-    // (invalid API keys cause errors even when OAuth is available)
-    delete env.ANTHROPIC_API_KEY;
 
     const proc = spawn('claude', ['-p'], {
       env: env as NodeJS.ProcessEnv,
@@ -585,7 +590,8 @@ async function main(): Promise<void> {
       const langIdx = args.indexOf('--lang');
       const lang = langIdx !== -1 && args[langIdx + 1] ? args[langIdx + 1] : 'en';
       const maxIdx = args.indexOf('--max');
-      const maxAgents = maxIdx !== -1 && args[maxIdx + 1] ? parseInt(args[maxIdx + 1], 10) : 5;
+      const maxRaw = maxIdx !== -1 && args[maxIdx + 1] ? parseInt(args[maxIdx + 1], 10) : 5;
+      const maxAgents = Number.isNaN(maxRaw) || maxRaw < 1 ? 5 : maxRaw;
       await cmdInit(lang, maxAgents);
       break;
     }

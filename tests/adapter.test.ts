@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   splitIntoSections,
@@ -248,7 +248,8 @@ describe('calculateConfidence', () => {
 });
 
 const AGENCY_AGENTS_PATH = join(process.cwd(), 'agents/external/agency-agents');
-const hasSubmodule = existsSync(AGENCY_AGENTS_PATH);
+const hasSubmodule = existsSync(AGENCY_AGENTS_PATH) &&
+  readdirSync(AGENCY_AGENTS_PATH).length > 0;
 
 describe.skipIf(!hasSubmodule)('parseAgencyAgentMd (real file)', () => {
   it('실제 .md 파일을 AgentDefinition으로 파싱한다', () => {
