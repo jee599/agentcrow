@@ -18,25 +18,62 @@ const EXTERNAL_DIR = path.join(PKG_ROOT, 'agents', 'external', 'agency-agents');
 const AGENTCROW_START = '<!-- AgentCrow Start -->';
 const AGENTCROW_END = '<!-- AgentCrow End -->';
 
+// ─── ANSI colors ───
+const c = {
+  purple: (s: string) => `\x1b[35m${s}\x1b[0m`,
+  green: (s: string) => `\x1b[32m${s}\x1b[0m`,
+  yellow: (s: string) => `\x1b[33m${s}\x1b[0m`,
+  cyan: (s: string) => `\x1b[36m${s}\x1b[0m`,
+  dim: (s: string) => `\x1b[90m${s}\x1b[0m`,
+  bold: (s: string) => `\x1b[1m${s}\x1b[0m`,
+  red: (s: string) => `\x1b[31m${s}\x1b[0m`,
+  bgPurple: (s: string) => `\x1b[45m\x1b[37m${s}\x1b[0m`,
+};
+
+const VERSION = '3.3.1';
+
+// ─── Role emoji map ───
+const ROLE_EMOJI: Record<string, string> = {
+  frontend: '🖥️', ui: '🖥️',
+  backend: '🏗️', api: '🏗️', architect: '🏗️',
+  qa: '🧪', test: '🧪',
+  security: '🛡️', auditor: '🛡️',
+  writer: '📝', docs: '📝', translator: '📝',
+  data: '🔄', pipeline: '🔄',
+  design: '🎨', ux: '🎨',
+  devops: '⚙️', sre: '⚙️',
+  game: '🎮', level: '🎮', unity: '🎮', unreal: '🎮', godot: '🎮',
+  ai: '🤖', ml: '🤖',
+  marketing: '📢', seo: '📢', content: '📢',
+  product: '📊', analyst: '📊',
+  mobile: '📱',
+  refactoring: '♻️',
+  complexity: '🔍',
+};
+
+function getRoleEmoji(role: string): string {
+  for (const [key, emoji] of Object.entries(ROLE_EMOJI)) {
+    if (role.includes(key)) return emoji;
+  }
+  return '🐦';
+}
+
 function printUsage(): void {
   console.log(`
-\x1b[35m🐦 agentcrow\x1b[0m — Auto Agent Router for Claude Code
+  ${c.purple('🐦 AgentCrow')} ${c.dim(`v${VERSION}`)} — Auto Agent Router for Claude Code
 
-\x1b[1mUsage:\x1b[0m
-  agentcrow init [--lang ko] [--max 5]  Set up agents (default: English, max 5 per dispatch)
-  agentcrow on                       Enable AgentCrow (restore CLAUDE.md)
-  agentcrow off                      Disable AgentCrow (backup & remove CLAUDE.md)
-  agentcrow status                   Check if AgentCrow is active
-  agentcrow agents                   List all available agents
-  agentcrow agents search <query>    Search agents by keyword
-  agentcrow compose <prompt>         Decompose a prompt (dry run)
+  ${c.bold('Usage:')}
+    ${c.cyan('agentcrow init')} ${c.dim('[--lang ko] [--max 5]')}  Set up agents
+    ${c.cyan('agentcrow on')}                          Re-enable
+    ${c.cyan('agentcrow off')}                         Disable temporarily
+    ${c.cyan('agentcrow status')}                      Check status
+    ${c.cyan('agentcrow agents')}                      List all agents
+    ${c.cyan('agentcrow agents search')} ${c.dim('<query>')}      Search by keyword
+    ${c.cyan('agentcrow compose')} ${c.dim('<prompt>')}           Preview decomposition
 
-\x1b[1mExamples:\x1b[0m
-  agentcrow init
-  agentcrow init --lang ko           # Korean template
-  agentcrow off                      # Disable temporarily
-  agentcrow on                       # Re-enable
-  agentcrow compose "Build a todo app"
+  ${c.bold('Examples:')}
+    ${c.dim('$')} agentcrow init
+    ${c.dim('$')} agentcrow compose "Build a todo app with auth and tests"
 `);
 }
 
@@ -68,14 +105,14 @@ async function ensureGlobalAgents(): Promise<{ builtinDir: string; externalDir: 
         }
       }
     }
-    if (copied > 0) console.log(`  Installed ${copied} builtin agents → ~/.agentcrow/`);
-    else console.log(`  Builtin agents ready (${files.length})`);
+    if (copied > 0) console.log(`  ${c.green('▸')} Builtin agents ··· ${c.bold(String(copied))} installed ${c.green('✓')}`);
+    else console.log(`  ${c.green('▸')} Builtin agents ··· ${c.bold(String(files.length))} ready ${c.green('✓')}`);
   }
 
   // 2. Download external agents (once)
   if (!fs.existsSync(GLOBAL_EXTERNAL)) {
     fs.mkdirSync(path.join(GLOBAL_DIR, 'external'), { recursive: true });
-    console.log('  Downloading external agents (agency-agents)...');
+    console.log(`  ${c.yellow('▸')} External agents ··· downloading`);
     try {
       const git = spawn('git', ['clone', '--depth', '1', 'https://github.com/msitarzewski/agency-agents.git', GLOBAL_EXTERNAL], {
         stdio: ['pipe', 'pipe', 'pipe'],
@@ -86,12 +123,12 @@ async function ensureGlobalAgents(): Promise<{ builtinDir: string; externalDir: 
       });
       const gitDir = path.join(GLOBAL_EXTERNAL, '.git');
       if (fs.existsSync(gitDir)) fs.rmSync(gitDir, { recursive: true, force: true });
-      console.log('  ✓ Downloaded external agents → ~/.agentcrow/');
+      console.log(`  ${c.green('▸')} External agents ··· downloaded ${c.green('✓')}`);
     } catch {
-      console.log('  ⚠ Failed to download external agents (git required). Builtin only.');
+      console.log(`  ${c.yellow('▸')} External agents ··· ${c.yellow('skipped')} ${c.dim('(git required)')}`);
     }
   } else {
-    console.log('  External agents ready');
+    console.log(`  ${c.green('▸')} External agents ··· ready ${c.green('✓')}`);
   }
 
   // 3. Generate .md files globally (skip existing individually)
@@ -139,8 +176,8 @@ async function ensureGlobalAgents(): Promise<{ builtinDir: string; externalDir: 
       // skip failed agents
     }
   }
-  if (mdGenerated > 0) console.log(`  Generated ${mdGenerated} agent .md files → ~/.agentcrow/agents/md/`);
-  if (mdSkipped > 0 && mdGenerated === 0) console.log(`  Agent .md files ready (${mdSkipped} skipped)`);
+  if (mdGenerated > 0) console.log(`  ${c.green('▸')} Agent definitions ··· ${c.bold(String(mdGenerated))} generated ${c.green('✓')}`);
+  if (mdSkipped > 0 && mdGenerated === 0) console.log(`  ${c.green('▸')} Agent definitions ··· ${c.bold(String(mdSkipped))} ready ${c.green('✓')}`);
 
   return { builtinDir: GLOBAL_BUILTIN, externalDir: GLOBAL_EXTERNAL, agentCount: allAgents.length };
 }
@@ -148,6 +185,10 @@ async function ensureGlobalAgents(): Promise<{ builtinDir: string; externalDir: 
 // ─── agentcrow init ───
 async function cmdInit(lang: string = 'en', maxAgents: number = 5): Promise<void> {
   const cwd = process.cwd();
+
+  console.log();
+  console.log(`  ${c.purple('🐦 AgentCrow')} ${c.dim(`v${VERSION}`)}`);
+  console.log();
 
   // 1. Ensure global agent storage
   const { builtinDir, externalDir, agentCount } = await ensureGlobalAgents();
@@ -171,7 +212,7 @@ async function cmdInit(lang: string = 'en', maxAgents: number = 5): Promise<void
     } else if (stat.isDirectory()) {
       // Migrate: old per-project copy exists, remove it
       fs.rmSync(agentsDir, { recursive: true, force: true });
-      console.log('  Migrated: removed per-project agent copies');
+      console.log(`  ${c.dim('▸ Migrated: removed per-project agent copies')}`);
     }
   } catch {
     // agentsDir doesn't exist yet, fine
@@ -179,12 +220,11 @@ async function cmdInit(lang: string = 'en', maxAgents: number = 5): Promise<void
 
   try {
     fs.symlinkSync(GLOBAL_MD, agentsDir, 'dir');
-    console.log(`  Linked .claude/agents/ → ~/.agentcrow/agents/md/ (${allAgents.length} agents)`);
+    console.log(`  ${c.green('▸')} Agent symlink ··· ${c.bold(String(allAgents.length))} agents linked ${c.green('✓')}`);
   } catch (err: unknown) {
     const code = (err as NodeJS.ErrnoException).code;
     if (code === 'EEXIST') {
-      // Already linked
-      console.log(`  .claude/agents/ already linked (${allAgents.length} agents)`);
+      console.log(`  ${c.green('▸')} Agent symlink ··· ${c.bold(String(allAgents.length))} agents linked ${c.green('✓')}`);
     } else {
       console.error(`  ✗ Failed to create symlink: ${(err as Error).message}`);
       process.exit(1);
@@ -194,34 +234,39 @@ async function cmdInit(lang: string = 'en', maxAgents: number = 5): Promise<void
   // 4. Generate slim CLAUDE.md (rules only, no agent list)
   const claudeMdPath = path.join(claudeDir, 'CLAUDE.md');
 
-  const agentCrowSection = `${AGENTCROW_START}
-# AgentCrow — Auto Agent Dispatch
+  const roleEmojiGuide = `## Role Emoji Reference
+Use these emojis when showing the dispatch plan:
+- 🖥️ frontend, ui — 🏗️ backend, api, architect — 🧪 qa, test
+- 🛡️ security — 📝 writer, docs — 🔄 data, pipeline
+- 🎨 design, ux — ⚙️ devops, sre — 🎮 game
+- 🤖 ai, ml — 📢 marketing, seo — 📊 product — 📱 mobile
+- 🐦 (default for unmatched roles)`;
 
-${lang === 'ko'
-  ? `## 규칙
-1. 복잡한 요청(2개 이상 작업)을 받으면 .claude/agents/에서 적합한 에이전트를 찾아 Agent 도구로 dispatch해라.
-2. 한 번에 최대 **${maxAgents}개** 에이전트까지 dispatch한다. 그 이상 필요하면 우선순위가 높은 ${maxAgents}개만 선택해라.
-3. 독립적인 태스크는 병렬로, 의존성 있는 건 순차로 dispatch해라.
-4. 질문하지 마라. 스스로 판단하고 진행해라.
-5. dispatch 전에 계획을 먼저 보여줘라:
-   \`\`\`
-   🐦 AgentCrow — N개 에이전트 분배:
-   1. @agent_role → "할 일"
-   2. @agent_role → "할 일"
-   \`\`\`
-6. 단순한 요청(버그 수정, 파일 수정 등)은 에이전트 없이 직접 처리해라.`
-  : `## Rules
+  const agentCrowSection = `${AGENTCROW_START}
+# 🐦 AgentCrow — Auto Agent Dispatch
+
+## Rules
 1. For complex requests (2+ tasks), find matching agents from .claude/agents/ and dispatch them using the Agent tool.
 2. Dispatch at most **${maxAgents} agents** at a time. If more are needed, pick the top ${maxAgents} by priority.
 3. Dispatch independent tasks in parallel, dependent ones sequentially.
 4. Do not ask questions. Make decisions and proceed.
-5. Before dispatching, show the plan:
-   \`\`\`
-   🐦 AgentCrow — dispatching N agents:
-   1. @agent_role → "task description"
-   2. @agent_role → "task description"
-   \`\`\`
-6. Simple requests (bug fixes, single file edits) — handle directly, no agents needed.`}
+5. Before dispatching, show the plan in this exact format:
+
+\`\`\`
+━━━ 🐦 AgentCrow ━━━━━━━━━━━━━━━━━━━━━
+Dispatching N agents:
+
+{emoji} @agent_role → task description
+{emoji} @agent_role → task description
+{emoji} @agent_role → task description (depends: 1,2)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+\`\`\`
+
+6. Simple requests (bug fixes, single file edits) — handle directly, no agents needed.
+7. After all agents complete, show: \`━━━ 🐦 AgentCrow complete ━━━━━━━━━━━━━\`
+
+${roleEmojiGuide}
 
 ## Agents: ${allAgents.length} available in .claude/agents/
 ${AGENTCROW_END}`;
@@ -238,15 +283,15 @@ ${AGENTCROW_END}`;
         const before = existing.slice(0, startIdx);
         const after = existing.slice(endIdx + AGENTCROW_END.length);
         fs.writeFileSync(claudeMdPath, before + agentCrowSection + after, 'utf-8');
-        console.log(`  Updated AgentCrow section in CLAUDE.md`);
+        console.log(`  ${c.green('▸')} Dispatch rules ··· CLAUDE.md updated ${c.green('✓')}`);
       } else {
         // No valid markers — append section (preserve existing content)
         fs.writeFileSync(claudeMdPath, existing + '\n\n---\n\n' + agentCrowSection, 'utf-8');
-        console.log(`  Merged AgentCrow into existing CLAUDE.md`);
+        console.log(`  ${c.green('▸')} Dispatch rules ··· merged into CLAUDE.md ${c.green('✓')}`);
       }
     } else {
       fs.writeFileSync(claudeMdPath, agentCrowSection, 'utf-8');
-      console.log(`  Generated CLAUDE.md`);
+      console.log(`  ${c.green('▸')} Dispatch rules ··· CLAUDE.md created ${c.green('✓')}`);
     }
   } catch (err: unknown) {
     const code = (err as NodeJS.ErrnoException).code;
@@ -262,11 +307,12 @@ ${AGENTCROW_END}`;
 
   // 6. Install hook
   installHook(cwd);
-  console.log('  Installed SessionStart hook');
+  console.log(`  ${c.green('▸')} SessionStart hook ··· installed ${c.green('✓')}`);
 
   console.log();
-  console.log(`\x1b[32m✓ AgentCrow initialized.\x1b[0m ${allAgents.length} agents (symlinked from ~/.agentcrow/), max ${maxAgents} per dispatch.`);
-  console.log('\x1b[90m  agentcrow off / on / status\x1b[0m');
+  console.log(`  ${c.green('✓')} ${c.purple('AgentCrow')} ready — ${c.bold(String(allAgents.length))} agents, max ${c.bold(String(maxAgents))} per dispatch`);
+  console.log(`  ${c.dim('agentcrow off / on / status')}`);
+  console.log();
 }
 
 // ─── agentcrow agents ───
@@ -276,22 +322,27 @@ async function cmdAgents(): Promise<void> {
   const manager = new AgentManager(bDir, eDir);
   await manager.initialize();
 
+  console.log(`\n  ${c.purple('🐦 AgentCrow')} ${c.dim(`v${VERSION}`)}\n`);
+
   const divisions = manager.listAgents();
   let totalCount = 0;
 
   for (const { division, agents } of divisions) {
-    console.log(`\n\x1b[1m[${division}]\x1b[0m (${agents.length})`);
+    const divColor = division === 'builtin' ? c.yellow : c.cyan;
+    console.log(`  ${divColor(`[${division}]`)} ${c.dim(`(${agents.length})`)}`);
     for (const agent of agents) {
-      const sourceTag = agent.source === 'builtin' ? '\x1b[33mbuiltin\x1b[0m' : '\x1b[36mexternal\x1b[0m';
-      console.log(`  ${sourceTag} \x1b[1m${agent.role}\x1b[0m — ${agent.name}`);
+      const emoji = getRoleEmoji(agent.role);
+      const sourceTag = agent.source === 'builtin' ? c.yellow('builtin') : c.cyan('external');
+      console.log(`    ${emoji} ${sourceTag} ${c.bold(agent.role)} ${c.dim('—')} ${agent.name}`);
       if (agent.description) {
-        console.log(`         ${agent.description.slice(0, 80)}`);
+        console.log(`       ${c.dim(agent.description.slice(0, 80))}`);
       }
     }
     totalCount += agents.length;
+    console.log();
   }
 
-  console.log(`\n\x1b[90mTotal: ${totalCount} agents\x1b[0m`);
+  console.log(`  ${c.dim(`Total: ${totalCount} agents`)}`);
 }
 
 // ─── agentcrow agents search ───
@@ -309,16 +360,17 @@ async function cmdAgentsSearch(query: string): Promise<void> {
     return;
   }
 
-  console.log(`\n\x1b[1mSearch results for "${query}":\x1b[0m\n`);
+  console.log(`\n  ${c.purple('🐦')} Search: ${c.bold(`"${query}"`)}\n`);
   for (const { entry, score } of results) {
-    const sourceTag = entry.source.type === 'builtin' ? '\x1b[33mbuiltin\x1b[0m' : '\x1b[36mexternal\x1b[0m';
-    console.log(`  ${sourceTag} \x1b[1m${entry.role}\x1b[0m (score: ${score.toFixed(1)}) — ${entry.name}`);
+    const emoji = getRoleEmoji(entry.role);
+    const sourceTag = entry.source.type === 'builtin' ? c.yellow('builtin') : c.cyan('external');
+    console.log(`  ${emoji} ${sourceTag} ${c.bold(entry.role)} ${c.dim(`score:${score.toFixed(1)}`)} — ${entry.name}`);
     if (entry.description) {
-      console.log(`         ${entry.description.slice(0, 80)}`);
+      console.log(`     ${c.dim(entry.description.slice(0, 80))}`);
     }
   }
 
-  console.log(`\n\x1b[90m${results.length} results\x1b[0m`);
+  console.log(`\n  ${c.dim(`${results.length} results`)}`);
 }
 
 // ─── agentcrow compose ───
@@ -328,11 +380,12 @@ async function cmdCompose(prompt: string): Promise<void> {
   const manager = new AgentManager(bDir, eDir);
   await manager.initialize();
 
-  console.log('\x1b[35mDecomposing prompt...\x1b[0m\n');
+  console.log(`\n  ${c.purple('🐦')} Decomposing prompt...\n`);
 
   const tasks = await decompose(prompt);
 
-  console.log(`\x1b[1mDecomposed into ${tasks.length} tasks:\x1b[0m\n`);
+  console.log(`  ━━━ ${c.purple('🐦 AgentCrow')} ━━━━━━━━━━━━━━━━━━━━━`);
+  console.log(`  Dispatching ${c.bold(String(tasks.length))} agents:\n`);
 
   for (let i = 0; i < tasks.length; i++) {
     const t = tasks[i];
@@ -345,21 +398,23 @@ async function cmdCompose(prompt: string): Promise<void> {
 
     const matchIcon =
       matchResult.matchType === 'exact'
-        ? '\x1b[32m✓ exact\x1b[0m'
+        ? c.green('✓ exact')
         : matchResult.matchType === 'fuzzy'
-          ? '\x1b[33m~ fuzzy\x1b[0m'
-          : '\x1b[31m✗ none\x1b[0m';
+          ? c.yellow('~ fuzzy')
+          : c.red('✗ none');
 
+    const emoji = getRoleEmoji(t.role);
     const agentName = matchResult.agent?.name ?? t.role;
-    console.log(`  ${i + 1}. \x1b[1m${agentName}\x1b[0m \x1b[90m(${t.role})\x1b[0m [${matchIcon}]`);
+    console.log(`  ${emoji} ${c.bold(agentName)} ${c.dim(`(${t.role})`)} [${matchIcon}]`);
     console.log(`     ${t.action}`);
 
     if (matchResult.candidates && matchResult.candidates.length > 1) {
-      console.log(`     \x1b[90mCandidates: ${matchResult.candidates.map((c) => `${c.name}(${c.score})`).join(', ')}\x1b[0m`);
+      console.log(`     ${c.dim(`Candidates: ${matchResult.candidates.map((cd) => `${cd.name}(${cd.score})`).join(', ')}`)}`);
     }
   }
 
-  console.log(`\n\x1b[90mDry run — no agents were dispatched.\x1b[0m`);
+  console.log(`\n  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+  console.log(`  ${c.dim('Dry run — no agents were dispatched.')}`);
 }
 
 // ─── Decompose via claude -p ───
@@ -445,7 +500,7 @@ function cmdOff(): void {
   }
 
   removeHook(cwd);
-  console.log('\x1b[35m🐦 AgentCrow disabled.\x1b[0m CLAUDE.md backed up. Run `agentcrow on` to re-enable.');
+  console.log(`\n  ${c.red('●')} ${c.purple('🐦 AgentCrow')} ${c.yellow('disabled')} — CLAUDE.md backed up. Run ${c.cyan('agentcrow on')} to re-enable.\n`);
 }
 
 // ─── agentcrow on ───
@@ -458,7 +513,7 @@ function cmdOn(): void {
   if (fs.existsSync(claudeMd)) {
     const content = fs.readFileSync(claudeMd, 'utf-8');
     if (content.includes('AgentCrow') || content.includes('agentcrow')) {
-      console.log('\x1b[32m✓ AgentCrow is already on.\x1b[0m');
+      console.log(`\n  ${c.green('●')} ${c.purple('🐦 AgentCrow')} already ${c.green('ON')}\n`);
       installHook(cwd);
       return;
     }
@@ -477,9 +532,9 @@ function cmdOn(): void {
     }
 
     installHook(cwd);
-    console.log('\x1b[32m✓ AgentCrow re-enabled.\x1b[0m Restored from backup.');
+    console.log(`\n  ${c.green('●')} ${c.purple('🐦 AgentCrow')} ${c.green('re-enabled')} — restored from backup.\n`);
   } else {
-    console.log('\x1b[33m⚠ No backup found. Run `agentcrow init` first.\x1b[0m');
+    console.log(`\n  ${c.yellow('⚠')} No backup found. Run ${c.cyan('agentcrow init')} first.\n`);
   }
 }
 
@@ -497,22 +552,30 @@ function cmdStatus(): void {
     const isAgentCrow = content.includes('AgentCrow') || content.includes('agentcrow');
 
     if (isAgentCrow) {
-      // Count agents
-      let count = 0;
+      let builtinCount = 0;
+      let externalCount = 0;
       const builtinDir = path.join(agrDir, 'builtin');
       if (fs.existsSync(builtinDir)) {
-        count = fs.readdirSync(builtinDir).filter(f => f.endsWith('.yaml')).length;
+        builtinCount = fs.readdirSync(builtinDir).filter(f => f.endsWith('.yaml')).length;
       }
-      console.log(`\x1b[32m🐦 AgentCrow is ON\x1b[0m — ${count} builtin agents loaded`);
-      console.log(`   CLAUDE.md: ${claudeMd}`);
-      console.log(`   Agents:    ${agrDir}`);
+      const mdDir = path.join(agrDir, 'md');
+      if (fs.existsSync(mdDir)) {
+        externalCount = Math.max(0, fs.readdirSync(mdDir).filter(f => f.endsWith('.md')).length - builtinCount);
+      }
+      const totalCount = builtinCount + externalCount;
+      console.log();
+      console.log(`  ${c.green('●')} ${c.purple('🐦 AgentCrow')} ${c.green('ON')}`);
+      console.log(`    ${c.bold(String(builtinCount))} builtin + ${c.bold(String(externalCount))} external = ${c.bold(String(totalCount))} agents`);
+      console.log(`    ${c.dim(`CLAUDE.md: ${claudeMd}`)}`);
+      console.log(`    ${c.dim(`Agents:    ${agrDir}`)}`);
+      console.log();
     } else {
-      console.log('\x1b[33m⚠ .claude/CLAUDE.md exists but is not AgentCrow.\x1b[0m');
+      console.log(`\n  ${c.yellow('⚠')} .claude/CLAUDE.md exists but is not AgentCrow.\n`);
     }
   } else if (hasAgr) {
-    console.log('\x1b[33m🐦 AgentCrow is OFF\x1b[0m — agents installed but CLAUDE.md missing. Run `agentcrow on`.');
+    console.log(`\n  ${c.red('●')} ${c.purple('🐦 AgentCrow')} ${c.yellow('OFF')} — agents installed but CLAUDE.md missing. Run ${c.cyan('agentcrow on')}\n`);
   } else {
-    console.log('\x1b[90m🐦 AgentCrow is not installed.\x1b[0m Run `agentcrow init`.');
+    console.log(`\n  ${c.dim('●')} ${c.purple('🐦 AgentCrow')} ${c.dim('not installed')} — Run ${c.cyan('agentcrow init')}\n`);
   }
 }
 
@@ -538,13 +601,14 @@ function installHook(cwd: string): void {
     return false;
   });
   if (!hasOurHook) {
-    const hookScript = `echo '<AGENTCROW_DISPATCH_RULES>
+    const hookScript = `printf '\\033[35m🐦 AgentCrow active\\033[0m \\033[90m— auto-dispatch enabled\\033[0m\\n' && echo '<AGENTCROW_DISPATCH_RULES>
 CRITICAL INSTRUCTION — AgentCrow is active.
 When the user gives a complex request (2+ tasks like "build X with Y and Z"), you MUST:
 1. Look in .claude/agents/ for matching agent .md files
-2. Show dispatch plan: 🐦 AgentCrow — dispatching N agents
+2. Show dispatch plan using the format in CLAUDE.md (with ━━━ borders and role emojis)
 3. Use the Agent tool to dispatch each agent with their .md file as the prompt
 4. Do NOT do the work yourself. Delegate to agents.
+5. After all agents complete, show: ━━━ 🐦 AgentCrow complete ━━━━━━━━━━━━━
 Simple single-task requests: handle directly, no agents.
 </AGENTCROW_DISPATCH_RULES>'`;
 
