@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/agentcrow"><img src="https://img.shields.io/npm/v/agentcrow?style=flat-square&color=violet" alt="npm" /></a>
   <img src="https://img.shields.io/badge/agents-9_builtin-brightgreen?style=flat-square" alt="Agents" />
-  <img src="https://img.shields.io/badge/tests-60_passing-brightgreen?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/tests-78_passing-brightgreen?style=flat-square" alt="Tests" />
   <a href="LICENSE"><img src="https://img.shields.io/github/license/jee599/agentcrow?style=flat-square" alt="License" /></a>
 </p>
 
@@ -29,6 +29,12 @@
   <a href="README.hi.md">हिन्दी</a> •
   <a href="README.tr.md">Türkçe</a> •
   <a href="README.vi.md">Tiếng Việt</a>
+</p>
+
+---
+
+<p align="center">
+  <img src="../assets/demo.gif" alt="AgentCrow demo — auto-dispatching agents" width="720" />
 </p>
 
 ---
@@ -211,7 +217,7 @@ npx agentcrow compose "prompt"  # Предпросмотр декомпозиц�
 
 ```bash
 git clone --recursive https://github.com/jee599/agentcrow.git
-cd agentcrow && npm install && npm test  # 60 tests
+cd agentcrow && npm install && npm test  # 78 tests
 ```
 
 ## 📜 Лицензия
