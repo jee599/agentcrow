@@ -1,5 +1,5 @@
 name: "Unreal GAS Specialist"
-role: unreal_gas_specialist
+role: "unreal_gas_specialist"
 description: "UE5 Gameplay Ability System expert — C++ architecture, networking, and optimization"
 tags: [unreal, gas, gameplay ability system, c++, ue5, combat, ability, gameplayeffect, gameplaytag, attribute]
 identity:

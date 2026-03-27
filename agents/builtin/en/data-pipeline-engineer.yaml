@@ -1,5 +1,5 @@
 name: "Data Pipeline Engineer"
-role: data_pipeline_engineer
+role: "data_pipeline_engineer"
 description: "Designs and builds data collection, transformation, and storage pipelines"
 tags: [data, pipeline, etl, database, sql, pandas, spark, ingestion, transformation, orchestration]
 identity:
