@@ -6,10 +6,26 @@ import { fileURLToPath } from 'node:url';
 const HOOK_SCRIPT_NAME = 'agentcrow-inject.sh';
 
 function getHookScriptSource(): string {
-  // In dist/utils/hooks.js → ../../scripts/agentcrow-inject.sh
+  // Strategy 1: relative to this file (dist/utils/hooks.js → ../../scripts/)
   const __filename = fileURLToPath(import.meta.url);
   const pkgRoot = path.resolve(path.dirname(__filename), '..', '..');
-  return path.join(pkgRoot, 'scripts', HOOK_SCRIPT_NAME);
+  const relativePath = path.join(pkgRoot, 'scripts', HOOK_SCRIPT_NAME);
+  if (fs.existsSync(relativePath)) return relativePath;
+
+  // Strategy 2: find via which agentcrow → resolve symlink → package root
+  try {
+    const { execSync } = require('node:child_process');
+    const binPath = execSync('which agentcrow', { stdio: 'pipe' }).toString().trim();
+    const realBin = fs.realpathSync(binPath);
+    // bin is at <pkg>/dist/cli.js, so go up 2 levels
+    const globalPkgRoot = path.resolve(path.dirname(realBin), '..');
+    const globalPath = path.join(globalPkgRoot, 'scripts', HOOK_SCRIPT_NAME);
+    if (fs.existsSync(globalPath)) return globalPath;
+  } catch {
+    // which not available or agentcrow not in PATH
+  }
+
+  return relativePath; // fallback (may not exist, triggers inline script)
 }
 
 function getHookScriptDest(): string {
