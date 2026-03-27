@@ -4,6 +4,7 @@ import { spawn } from 'node:child_process';
 import { AgentCatalog } from '../core/catalog.js';
 import { c, VERSION, GLOBAL_BUILTIN, GLOBAL_EXTERNAL, GLOBAL_MD, GLOBAL_DIR } from '../utils/constants.js';
 import { generateAgentIndex } from '../utils/index-generator.js';
+import { buildCatalogIndex } from '../utils/catalog-index.js';
 
 export async function cmdUpdate(): Promise<void> {
   console.log();
@@ -99,6 +100,10 @@ export async function cmdUpdate(): Promise<void> {
   // Regenerate INDEX.md
   generateAgentIndex(allAgents, GLOBAL_MD);
   console.log(`  ${c.green('▸')} Agent index ··· INDEX.md regenerated ${c.green('✓')}`);
+
+  // Rebuild catalog index
+  buildCatalogIndex(catalog);
+  console.log(`  ${c.green('▸')} Catalog index ··· rebuilt ${c.green('✓')}`);
 
   console.log();
   console.log(`  ${c.green('✓')} Update complete — ${c.bold(String(allAgents.length))} agents available`);

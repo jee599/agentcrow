@@ -6,6 +6,7 @@ import { AgentCatalog } from '../core/catalog.js';
 import { installHook } from '../utils/hooks.js';
 import { installMcpServer } from '../utils/mcp-config.js';
 import { generateAgentIndex } from '../utils/index-generator.js';
+import { buildCatalogIndex } from '../utils/catalog-index.js';
 import {
   c, VERSION,
   BUILTIN_DIR, GLOBAL_BUILTIN, GLOBAL_EXTERNAL, GLOBAL_MD, GLOBAL_DIR,
@@ -111,6 +112,10 @@ export async function ensureGlobalAgents(): Promise<{ builtinDir: string; extern
   // 4. Generate INDEX.md for lazy-loading
   generateAgentIndex(allAgents, GLOBAL_MD);
   console.log(`  ${c.green('▸')} Agent index ··· INDEX.md generated ${c.green('✓')}`);
+
+  // 5. Build catalog index for fast hook-based persona injection
+  buildCatalogIndex(catalog);
+  console.log(`  ${c.green('▸')} Catalog index ··· catalog-index.json built ${c.green('✓')}`);
 
   return { builtinDir: GLOBAL_BUILTIN, externalDir: GLOBAL_EXTERNAL, agentCount: allAgents.length };
 }

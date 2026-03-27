@@ -26,7 +26,8 @@ describe('hook management', () => {
 
   it('installHook이 중복 hook을 방지한다', () => {
     const content = fs.readFileSync(hooksSrcPath, 'utf-8');
-    expect(content).toContain('hasOurHook');
+    expect(content).toContain('hasSessionHook');
+    expect(content).toContain('hasInjectHook');
   });
 
   it('removeHook이 빈 hooks 객체를 정리한다', () => {

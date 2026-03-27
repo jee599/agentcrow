@@ -11,6 +11,7 @@ import { cmdUninstall } from './commands/uninstall.js';
 import { cmdServe } from './commands/serve.js';
 import { cmdAdd, cmdRemove } from './commands/add.js';
 import { cmdStats } from './commands/stats.js';
+import { cmdInject } from './commands/inject.js';
 
 function printUsage(): void {
   console.log(`
@@ -126,6 +127,10 @@ async function main(): Promise<void> {
 
     case 'stats':
       cmdStats();
+      break;
+
+    case 'inject':
+      await cmdInject();
       break;
 
     case 'serve':

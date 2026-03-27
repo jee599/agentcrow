@@ -28,7 +28,8 @@
   "license": "MIT",
   "files": [
     "dist/",
-    "agents/builtin/"
+    "agents/builtin/",
+    "scripts/"
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.28.0",
