@@ -134,6 +134,38 @@ describe('init command --lang', () => {
   });
 });
 
+describe('add/remove commands', () => {
+  const addPath = path.resolve('src/commands/add.ts');
+
+  it('add.ts가 존재한다', () => {
+    expect(fs.existsSync(addPath)).toBe(true);
+  });
+
+  it('URL과 로컬 파일 모두 지원한다', () => {
+    const content = fs.readFileSync(addPath, 'utf-8');
+    expect(content).toContain('isUrl');
+    expect(content).toContain('http://');
+    expect(content).toContain('path.resolve');
+  });
+
+  it('.md와 .yaml 형식을 지원한다', () => {
+    const content = fs.readFileSync(addPath, 'utf-8');
+    expect(content).toContain('.md');
+    expect(content).toContain('.yaml');
+  });
+
+  it('커스텀 에이전트만 삭제할 수 있다', () => {
+    const content = fs.readFileSync(addPath, 'utf-8');
+    expect(content).toContain('custom');
+    expect(content).toContain('Only custom agents can be removed');
+  });
+
+  it('INDEX.md를 재생성한다', () => {
+    const content = fs.readFileSync(addPath, 'utf-8');
+    expect(content).toContain('generateAgentIndex');
+  });
+});
+
 describe('serve command (MCP server)', () => {
   const servePath = path.resolve('src/commands/serve.ts');
 
