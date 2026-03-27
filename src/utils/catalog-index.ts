@@ -1,6 +1,7 @@
 import * as fs from 'node:fs';
 import * as os from 'node:os';
 import * as path from 'node:path';
+import * as yaml from 'yaml';
 import type { AgentDefinition, CatalogEntry } from '../core/types.js';
 import type { AgentCatalog } from '../core/catalog.js';
 
@@ -17,10 +18,40 @@ export function buildCatalogIndex(catalog: AgentCatalog): void {
   const entries = catalog.listAll();
   const agents: Record<string, AgentDefinition> = {};
 
+  // Load all agents. Builtin takes priority — load directly from YAML (bypass cache)
   for (const entry of entries) {
-    const agent = catalog.loadAgent(entry);
-    if (agent) {
-      agents[entry.role] = agent;
+    if (entry.source.type === 'builtin') {
+      // Direct YAML load to bypass catalog cache (which may have external)
+      try {
+        const content = fs.readFileSync(entry.filePath, 'utf-8');
+        const parsed = yaml.parse(content);
+        const agent: AgentDefinition = {
+          name: parsed.name ?? '',
+          role: parsed.role ?? entry.role,
+          description: parsed.description ?? '',
+          identity: {
+            personality: parsed.identity?.personality?.trim() ?? '',
+            communication: parsed.identity?.communication?.trim() ?? '',
+            thinking: parsed.identity?.thinking?.trim() ?? '',
+          },
+          critical_rules: {
+            must: parsed.critical_rules?.must ?? [],
+            must_not: parsed.critical_rules?.must_not ?? [],
+          },
+          deliverables: parsed.deliverables ?? [],
+          success_metrics: parsed.success_metrics ?? [],
+          source: { type: 'builtin', filePath: entry.filePath },
+          tags: parsed.tags ?? [],
+        };
+        agents[entry.role] = agent; // Always overwrite
+      } catch {
+        // skip malformed YAML
+      }
+    } else {
+      const agent = catalog.loadAgent(entry);
+      if (agent && !agents[entry.role]) {
+        agents[entry.role] = agent;
+      }
     }
   }
 

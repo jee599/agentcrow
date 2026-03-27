@@ -13,15 +13,19 @@ import {
   AGENTCROW_START, AGENTCROW_END,
 } from '../utils/constants.js';
 
-export async function ensureGlobalAgents(): Promise<{ builtinDir: string; externalDir: string; agentCount: number }> {
+export async function ensureGlobalAgents(lang: string = 'en'): Promise<{ builtinDir: string; externalDir: string; agentCount: number }> {
   // 1. Copy builtin agents (from npm package → global)
+  // Use language-specific directory if available (agents/builtin/en/ or agents/builtin/)
+  const langBuiltinDir = path.join(BUILTIN_DIR, lang);
+  const effectiveBuiltinDir = fs.existsSync(langBuiltinDir) ? langBuiltinDir : BUILTIN_DIR;
+
   fs.mkdirSync(GLOBAL_BUILTIN, { recursive: true });
-  if (fs.existsSync(BUILTIN_DIR)) {
-    const files = fs.readdirSync(BUILTIN_DIR).filter((f) => f.endsWith('.yaml'));
+  if (fs.existsSync(effectiveBuiltinDir)) {
+    const files = fs.readdirSync(effectiveBuiltinDir).filter((f) => f.endsWith('.yaml'));
     let copied = 0;
     for (const file of files) {
       const dest = path.join(GLOBAL_BUILTIN, file);
-      const src = path.join(BUILTIN_DIR, file);
+      const src = path.join(effectiveBuiltinDir, file);
       if (!fs.existsSync(dest)) {
         fs.copyFileSync(src, dest);
         copied++;
@@ -200,7 +204,7 @@ export async function cmdInit(lang: string = 'en', maxAgents: number = 5, global
   console.log();
 
   // 1. Ensure global agent storage
-  const { builtinDir, externalDir, agentCount } = await ensureGlobalAgents();
+  const { builtinDir, externalDir, agentCount } = await ensureGlobalAgents(lang);
 
   // 2. Build catalog
   const catalog = new AgentCatalog(builtinDir, externalDir);

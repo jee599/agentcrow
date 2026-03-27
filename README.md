@@ -11,8 +11,8 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/agentcrow"><img src="https://img.shields.io/npm/v/agentcrow?style=flat-square&color=violet" alt="npm" /></a>
-  <img src="https://img.shields.io/badge/agents-144-brightgreen?style=flat-square" alt="Agents" />
-  <img src="https://img.shields.io/badge/tests-169_passing-brightgreen?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/agents-150-brightgreen?style=flat-square" alt="Agents" />
+  <img src="https://img.shields.io/badge/tests-187_passing-brightgreen?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/MCP-server-blue?style=flat-square" alt="MCP" />
   <a href="LICENSE"><img src="https://img.shields.io/github/license/jee599/agentcrow?style=flat-square" alt="License" /></a>
 </p>
@@ -285,7 +285,7 @@ AgentCrow auto-dispatches:
 
 ```bash
 git clone https://github.com/jee599/agentcrow.git
-cd agentcrow && npm install && npm test  # 169 tests
+cd agentcrow && npm install && npm test  # 187 tests
 ```
 
 ## 📜 License
