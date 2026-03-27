@@ -10,6 +10,7 @@ import { cmdDoctor } from './commands/doctor.js';
 import { cmdUninstall } from './commands/uninstall.js';
 import { cmdServe } from './commands/serve.js';
 import { cmdAdd, cmdRemove } from './commands/add.js';
+import { cmdStats } from './commands/stats.js';
 
 function printUsage(): void {
   console.log(`
@@ -28,6 +29,7 @@ function printUsage(): void {
     ${c.cyan('agentcrow uninstall')}                   Remove all AgentCrow data
     ${c.cyan('agentcrow add')} ${c.dim('<path|url>')}              Add custom agent (.md/.yaml)
     ${c.cyan('agentcrow remove')} ${c.dim('<role>')}              Remove custom agent
+    ${c.cyan('agentcrow stats')}                       Show dispatch statistics
     ${c.cyan('agentcrow serve')}                       Start MCP server (stdio)
 
   ${c.bold('Examples:')}
@@ -120,6 +122,10 @@ async function main(): Promise<void> {
         process.exit(1);
       }
       await cmdRemove(args[1]);
+      break;
+
+    case 'stats':
+      cmdStats();
       break;
 
     case 'serve':

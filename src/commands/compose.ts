@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { AgentManager } from '../core/agent-manager.js';
 import { AgentCatalog } from '../core/catalog.js';
 import { c, BUILTIN_DIR, GLOBAL_BUILTIN, EXTERNAL_DIR, GLOBAL_EXTERNAL, getRoleEmoji } from '../utils/constants.js';
+import { recordDispatch } from '../utils/history.js';
 
 function getAgentDirs(): { bDir: string; eDir: string } {
   const bDir = fs.existsSync(GLOBAL_BUILTIN) ? GLOBAL_BUILTIN : BUILTIN_DIR;
@@ -115,6 +116,16 @@ export async function cmdCompose(prompt: string, verbose: boolean = false): Prom
         : matchResult.matchType === 'fuzzy'
           ? c.yellow('~ fuzzy')
           : c.red('✗ none');
+
+    // Record dispatch history
+    recordDispatch({
+      timestamp: new Date().toISOString(),
+      role: t.role,
+      action: t.action,
+      matchType: matchResult.matchType,
+      agentName: matchResult.agent?.name ?? null,
+      source: 'cli',
+    });
 
     const emoji = getRoleEmoji(t.role);
     const agentName = matchResult.agent?.name ?? t.role;

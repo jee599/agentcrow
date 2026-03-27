@@ -22,7 +22,7 @@ describe('cli module', () => {
 
   it('cli.ts에 모든 서브커맨드가 정의되어 있다', () => {
     const content = fs.readFileSync(cliSrcPath, 'utf-8');
-    const expectedCommands = ['init', 'on', 'off', 'status', 'agents', 'compose', 'update', 'doctor', 'uninstall', 'add', 'remove', 'serve'];
+    const expectedCommands = ['init', 'on', 'off', 'status', 'agents', 'compose', 'update', 'doctor', 'uninstall', 'add', 'remove', 'stats', 'serve'];
     for (const cmd of expectedCommands) {
       expect(content).toContain(`'${cmd}'`);
     }

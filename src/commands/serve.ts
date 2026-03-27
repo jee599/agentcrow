@@ -5,6 +5,7 @@ import { AgentCatalog } from '../core/catalog.js';
 import { AgentManager } from '../core/agent-manager.js';
 import { GLOBAL_BUILTIN, GLOBAL_EXTERNAL, BUILTIN_DIR, EXTERNAL_DIR, VERSION } from '../utils/constants.js';
 import * as fs from 'node:fs';
+import { recordDispatch } from '../utils/history.js';
 
 function getAgentDirs(): { bDir: string; eDir: string } {
   const bDir = fs.existsSync(GLOBAL_BUILTIN) ? GLOBAL_BUILTIN : BUILTIN_DIR;
@@ -40,6 +41,16 @@ export async function cmdServe(): Promise<void> {
         role,
         action,
         depends_on: [],
+      });
+
+      // Record dispatch history
+      recordDispatch({
+        timestamp: new Date().toISOString(),
+        role,
+        action,
+        matchType: result.matchType,
+        agentName: result.agent?.name ?? null,
+        source: 'mcp',
       });
 
       if (!result.agent) {
