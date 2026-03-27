@@ -6,12 +6,12 @@
 
 <h3 align="center">
   Every subagent Claude spawns gets an expert persona — automatically.<br>
-  150 agents. Hook-enforced. Zero config.
+  154 agents. Hook-enforced. Zero config.
 </h3>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/agentcrow"><img src="https://img.shields.io/npm/v/agentcrow?style=flat-square&color=violet" alt="npm" /></a>
-  <img src="https://img.shields.io/badge/agents-150-brightgreen?style=flat-square" alt="Agents" />
+  <img src="https://img.shields.io/badge/agents-154-brightgreen?style=flat-square" alt="Agents" />
   <img src="https://img.shields.io/badge/tests-190_passing-brightgreen?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/hook-PreToolUse-blue?style=flat-square" alt="Hook" />
   <a href="LICENSE"><img src="https://img.shields.io/github/license/jee599/agentcrow?style=flat-square" alt="License" /></a>
@@ -209,7 +209,7 @@ agentcrow update                # Fetch latest agents
 agentcrow uninstall             # Clean removal
 
 # Agent Management
-agentcrow agents                # List all 150 agents
+agentcrow agents                # List all 154 agents
 agentcrow agents search <query> # Keyword search
 agentcrow add <path|url>        # Add custom agent (.md/.yaml)
 agentcrow remove <role>         # Remove custom agent
@@ -226,7 +226,7 @@ agentcrow serve                 # Start MCP server (stdio)
 ---
 
 <a id="agents"></a>
-## 🤖 150 Agents
+## 🤖 154 Agents
 
 ### 14 Hand-Crafted Builtin Agents
 
@@ -317,7 +317,7 @@ agentcrow stats
   ├── agents/
   │   ├── builtin/          14 YAML (hand-crafted)
   │   ├── external/         136 MD (agency-agents)
-  │   └── md/               150 unified .md files
+  │   └── md/               154 unified .md files
   ├── catalog-index.json    Pre-built for <5ms lookup
   └── history.json          Dispatch records (last 1000)
 
