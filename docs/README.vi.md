@@ -5,90 +5,68 @@
 </h1>
 
 <h3 align="center">
-  Mọi subagent mà Claude tạo ra đều được gán persona chuyên gia — tự động.<br>
-  150 agent. Bắt buộc qua Hook. Không cần cấu hình.
+  Claude tạo subagent trống. AgentCrow biến chúng thành chuyên gia.<br>
+  154 persona chuyên gia. Bắt buộc qua Hook. Không cần cấu hình.
 </h3>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/agentcrow"><img src="https://img.shields.io/npm/v/agentcrow?style=flat-square&color=violet" alt="npm" /></a>
-  <img src="https://img.shields.io/badge/agents-150-brightgreen?style=flat-square" alt="Agents" />
-  <img src="https://img.shields.io/badge/tests-187_passing-brightgreen?style=flat-square" alt="Tests" />
+  <img src="https://img.shields.io/badge/agents-154-brightgreen?style=flat-square" alt="Agents" />
+  <img src="https://img.shields.io/badge/tests-190_passing-brightgreen?style=flat-square" alt="Tests" />
   <img src="https://img.shields.io/badge/hook-PreToolUse-blue?style=flat-square" alt="Hook" />
   <a href="LICENSE"><img src="https://img.shields.io/github/license/jee599/agentcrow?style=flat-square" alt="License" /></a>
 </p>
 
 <p align="center">
-  <a href="#the-problem">Vấn đề</a> •
-  <a href="#quickstart">Bắt đầu nhanh</a> •
+  <a href="#install">Cài đặt</a> •
   <a href="#how-it-works">Cách hoạt động</a> •
-  <a href="#commands">Lệnh</a> •
   <a href="#agents">Agent</a> •
+  <a href="#commands">Lệnh</a> •
   <a href="../README.md">English</a> •
   <a href="README.ko.md">한국어</a> •
-  <a href="README.ja.md">日本語</a>
+  <a href="README.ja.md">日本語</a> •
+  <a href="README.zh.md">中文</a>
 </p>
 
 ---
 
-<a id="the-problem"></a>
 ## Vấn đề
 
-Khi Claude Code tạo một subagent, nó là một **người tổng quát trống rỗng**. Không chuyên môn, không quy tắc, không cá tính. Nó làm những gì bạn yêu cầu, nhưng không phải *theo cách một chuyên gia sẽ làm*.
+Khi Claude Code tạo một subagent, nó là một **người tổng quát trống rỗng**. Không chuyên môn, không quy tắc, không cá tính.
 
 ```
-Bạn: "Xây dựng SaaS với xác thực, test và tài liệu"
+Bạn: "Xây dựng auth + test + docs"
 
-Claude tạo 4 subagent:
-  Agent 1: (trống) → viết code xác thực
-  Agent 2: (trống) → viết test
-  Agent 3: (trống) → viết tài liệu
-  Agent 4: (trống) → viết UI
+Không có AgentCrow:
+  Agent 1: (trống) → viết auth       ← không có tiêu chuẩn code
+  Agent 2: (trống) → viết test       ← không có quy tắc coverage
+  Agent 3: (trống) → viết docs       ← không có style guide
 
-  = đầu ra chung chung
-  = không có tiêu chuẩn code
-  = không áp dụng kiến thức chuyên gia
-```
-
-AgentCrow giải quyết vấn đề này. Một **PreToolUse Hook** chặn mọi lệnh gọi Agent tool và tiêm persona chuyên gia phù hợp — trước khi subagent bắt đầu:
-
-```
-Bạn: cùng prompt
-
-AgentCrow chặn mọi lệnh gọi Agent tool:
-  Agent 1: → 🏗️ Persona Kiến trúc sư Backend được tiêm
+Với AgentCrow:
+  Agent 1: → 🏗️ Kiến trúc sư Backend được tiêm
             "Cực kỳ nghiêm ngặt về tính toàn vẹn dữ liệu. Không bao giờ deploy mà không có migration."
-  Agent 2: → 🧪 Persona Kỹ sư QA được tiêm
+  Agent 2: → 🧪 Kỹ sư QA được tiêm
             "Coi 'có lẽ chạy được' là sự xúc phạm cá nhân."
-  Agent 3: → 📝 Persona Kỹ thuật viên được tiêm
+  Agent 3: → 📝 Kỹ thuật viên được tiêm
             "Mỗi câu phải xứng đáng với vị trí của nó."
-  Agent 4: → 🖥️ Persona Lập trình viên Frontend được tiêm
-            "Composition thay vì inheritance, luôn luôn."
-
-  = đầu ra cấp chuyên gia
-  = quy tắc MUST/MUST NOT được áp dụng
-  = sản phẩm bàn giao cụ thể được xác định
 ```
 
-**Không có công cụ nào khác làm được điều này.** Không phải ECC (100K⭐), không phải agency-agents (59K⭐), không phải wshobson (31K⭐). AgentCrow là công cụ duy nhất bắt buộc tiêm persona ở cấp Hook.
+Một **PreToolUse Hook** chặn mọi lệnh gọi Agent tool và tiêm persona chuyên gia phù hợp — tự động, trước khi subagent bắt đầu. Không cần chọn thủ công. Không cần prompt engineering.
 
 ---
 
-<a id="quickstart"></a>
-## ⚡ Bắt đầu nhanh
+<a id="install"></a>
+## ⚡ Cài đặt
 
 ```bash
 npm i -g agentcrow
 agentcrow init --global
 ```
 
-Chỉ vậy thôi. Hai lệnh. Từ bây giờ:
-- Prompt phức tạp → Claude phân tách thành nhiệm vụ → tạo subagent
-- Mọi subagent → Hook của AgentCrow chặn → tiêm persona chuyên gia
-- Subagent hoạt động như chuyên gia, không phải người tổng quát
+Hai lệnh. Mọi subagent được gán persona chuyên gia từ bây giờ.
 
 > [!TIP]
-> Người dùng tiếng Anh: `agentcrow init --global --lang en`
-> 한국어: `agentcrow init --global --lang ko`
+> Xác minh: `agentcrow status` phải hiển thị cả hai hook (SessionStart + PreToolUse) đang hoạt động.
 
 ---
 
@@ -96,40 +74,33 @@ Chỉ vậy thôi. Hai lệnh. Từ bây giờ:
 ## ⚙️ Cách hoạt động
 
 ```
-Prompt của bạn: "Xây dựng ứng dụng todo với auth, test và docs"
-                    │
-                    ▼
-  Claude phân tách thành 4 nhiệm vụ
+  Bạn: "Xây dựng hệ thống auth với JWT, thêm test"
                     │
                     ▼
   Claude gọi Agent tool:
-    { name: "qa_engineer", prompt: "Viết test E2E" }
+    { name: "qa_engineer", prompt: "Write E2E tests" }
                     │
                     ▼
   ┌─────────────────────────────────────────┐
   │  PreToolUse Hook (tự động)              │
   │                                         │
   │  agentcrow-inject.sh → agentcrow inject │
-  │    1. Tải catalog-index.json (~5ms)     │
-  │    2. Tìm "qa_engineer" → khớp chính xác│
+  │    1. Tải catalog-index.json   (~5ms)   │
+  │    2. Tìm "qa_engineer"    (chính xác)  │
   │    3. Tải persona QA Engineer           │
-  │    4. Thêm vào đầu prompt qua updatedInput│
+  │    4. Thêm vào đầu prompt              │
   └─────────────────────────────────────────┘
                     │
                     ▼
   Subagent khởi động với persona đầy đủ:
     <AGENTCROW_PERSONA>
     You are QA Engineer — test specialist
-    ## Identity
-    Treats 'it probably works' as a personal insult.
     ## MUST
     - Test every public function
     - Cover happy path, edge case, error path
     ## MUST NOT
     - Never test implementation details
     - Never use sleep for async waits
-    ## Deliverables
-    - Unit tests, Integration tests, E2E tests
     </AGENTCROW_PERSONA>
 
     Write E2E tests    ← prompt gốc được giữ nguyên
@@ -138,14 +109,12 @@ Prompt của bạn: "Xây dựng ứng dụng todo với auth, test và docs"
 ### Ba chiến lược khớp
 
 | Ưu tiên | Chiến lược | Ví dụ |
-|---------|-----------|-------|
-| 1 | Khớp chính xác theo tên | `name: "qa_engineer"` → QA Engineer |
-| 2 | Khớp theo loại subagent | `subagent_type: "security_auditor"` → Security Auditor |
-| 3 | Mờ theo từ khóa + từ đồng nghĩa | `"kubernetes helm deploy"` → DevOps Automator |
+|---------|----------|-------|
+| 1 | Tên chính xác | `name: "qa_engineer"` → QA Engineer |
+| 2 | Loại subagent | `subagent_type: "security_auditor"` → Security Auditor |
+| 3 | Từ khóa + từ đồng nghĩa | `"kubernetes deploy"` → DevOps Automator |
 
-Khớp mờ sử dụng **bản đồ từ đồng nghĩa** (50+ mục) và **học từ lịch sử** — agent bạn dùng thường xuyên sẽ được ưu tiên khớp cao hơn.
-
-Các loại Claude tích hợp (`Explore`, `Plan`, `general-purpose`) không bao giờ bị chặn.
+Khớp mờ sử dụng **bản đồ từ đồng nghĩa** (50+ mục) và **học từ lịch sử** — agent bạn dùng thường xuyên được ưu tiên.
 
 ---
 
@@ -158,14 +127,13 @@ Các loại Claude tích hợp (`Explore`, `Plan`, `general-purpose`) không bao
 **❌ Không có AgentCrow**
 ```
 Claude tạo subagent trống:
-  prompt: "Viết test cho auth"
+  prompt: "Write tests for auth"
 
   Kết quả:
   - File test chung chung
   - Không có cấu trúc AAA
   - Bỏ qua các trường hợp biên
   - Không có mục tiêu coverage
-  - 15 phút đầu ra tầm thường
 ```
 
 </td>
@@ -173,13 +141,9 @@ Claude tạo subagent trống:
 
 **✅ Với AgentCrow**
 ```
-AgentCrow tiêm persona QA:
-  prompt: <AGENTCROW_PERSONA>
-    MUST: test mọi hàm public
-    MUST NOT: không test chi tiết triển khai
-    Deliverables: unit + integration + E2E
-  </AGENTCROW_PERSONA>
-  Viết test cho auth
+Persona Kỹ sư QA được tiêm:
+  MUST: test mọi hàm public
+  MUST NOT: không test chi tiết triển khai
 
   Kết quả:
   - Test có cấu trúc AAA
@@ -191,6 +155,50 @@ AgentCrow tiêm persona QA:
 </td>
 </tr>
 </table>
+
+---
+
+<a id="agents"></a>
+## 🤖 154 Agent
+
+### 14 Agent tích hợp thủ công
+
+Mỗi agent tích hợp có cá tính, quy tắc MUST/MUST NOT, sản phẩm bàn giao và chỉ số thành công.
+
+| Agent | Chuyên môn | Quy tắc chính |
+|-------|-----------|---------------|
+| **Backend Architect** | API, auth, cơ sở dữ liệu, cache | "Không bao giờ deploy mà không có migration" |
+| **Frontend Developer** | React/Next.js, Core Web Vitals | "Composition thay vì inheritance, luôn luôn" |
+| **QA Engineer** | Unit/integration/E2E, coverage | "Code chưa test là code hỏng" |
+| **Security Auditor** | OWASP, CVSS, PoC cho mọi phát hiện | "Không bao giờ nói 'code an toàn'" |
+| **UI Designer** | Hệ thống thiết kế, token, spacing | "Nếu không có trong hệ thống token, nó không tồn tại" |
+| **DevOps Automator** | CI/CD, Docker, K8s, secret | "Không có tag :latest trên production" |
+| **AI Engineer** | LLM, RAG, tối ưu prompt | "LLM cần guardrail" |
+| **Refactoring Specialist** | Code smell, danh mục Fowler | "Không bao giờ refactor mà không có test" |
+| **Complexity Critic** | Cyclomatic complexity, YAGNI | "Không gọi là phức tạp mà không có bằng chứng" |
+| **Data Pipeline Engineer** | ETL, idempotency, schema | "Idempotency không thể thương lượng" |
+| **Technical Writer** | Tài liệu API, hướng dẫn, README | "Mỗi câu phải xứng đáng với vị trí của nó" |
+| **Translator** | i18n, file locale, dịch thuật | "Không bao giờ dịch code identifier" |
+| **Compose Meta-Reviewer** | Kiểm toán thành phần agent | "Chặn thực thi khi điểm dưới 70" |
+| **Unreal GAS Specialist** | GameplayAbilitySystem, UE5 | "Không tính damage trong GameplayAbilities" |
+
+### 140 Agent bên ngoài (13 bộ phận)
+
+| Bộ phận | Số lượng | Ví dụ |
+|----------|------:|---------|
+| Engineering | 24 | Data Engineer, Mobile Builder, Security Engineer |
+| Marketing | 25 | SEO, TikTok, LinkedIn, Douyin Strategist |
+| Game Dev | 20 | Godot, Unity, Unreal chuyên gia |
+| Design | 8 | Brand Guardian, UX Architect, Visual Storyteller |
+| Testing | 8 | Accessibility, API, Performance |
+| Sales | 7 | Account, Deal, Outbound Strategist |
+| Support | 6 | Analytics, Finance, Customer Support |
+| Project Mgmt | 6 | Project Shepherd, Jira Steward |
+| Academic | 5 | Anthropologist, Historian, Psychologist |
+| Spatial Computing | 4 | XR, Metal, WebXR |
+| Specialized | 25 | MCP Builder, Workflow Architect, Data Extraction |
+| Product | 1 | Behavioral Nudge Engine |
+| Strategy | 1 | NEXUS Handoff Templates |
 
 ---
 
@@ -209,7 +217,7 @@ agentcrow update                # Lấy agent mới nhất
 agentcrow uninstall             # Gỡ cài đặt sạch
 
 # Quản lý Agent
-agentcrow agents                # Liệt kê tất cả 150 agent
+agentcrow agents                # Liệt kê tất cả 154 agent
 agentcrow agents search <query> # Tìm kiếm theo từ khóa
 agentcrow add <path|url>        # Thêm agent tùy chỉnh (.md/.yaml)
 agentcrow remove <role>         # Xóa agent tùy chỉnh
@@ -225,33 +233,60 @@ agentcrow serve                 # Khởi động MCP server (stdio)
 
 ---
 
-<a id="agents"></a>
-## 🤖 150 Agent
+## 📊 Thống kê
 
-### 14 Agent tích hợp thủ công
+```bash
+$ agentcrow stats
 
-Mỗi agent tích hợp có cá tính, phong cách giao tiếp, mô hình tư duy, quy tắc MUST/MUST NOT, sản phẩm bàn giao và chỉ số thành công.
+  🐦 AgentCrow Stats
 
-| Agent | Chức năng | Quy tắc chính |
-|-------|----------|---------------|
-| **Frontend Developer** | React/Next.js, Core Web Vitals, WCAG AA | "Composition thay vì inheritance, luôn luôn" |
-| **Backend Architect** | Thiết kế API, auth, cơ sở dữ liệu, cache | "Không bao giờ deploy mà không có migration" |
-| **QA Engineer** | Test unit/integration/E2E, coverage | "Code chưa test là code hỏng" |
-| **Security Auditor** | OWASP, chấm điểm CVSS, PoC cho mọi phát hiện | "Không bao giờ nói 'code an toàn'" |
-| **UI Designer** | Hệ thống thiết kế, token, thang spacing | "Nếu không có trong hệ thống token, nó không tồn tại" |
-| **DevOps Automator** | CI/CD, Docker, K8s, quản lý secret | "Không có tag :latest trên production" |
-| **AI Engineer** | Tích hợp LLM, RAG, tối ưu prompt | "LLM là thành phần không đáng tin cần guardrail" |
-| **Refactoring Specialist** | Code smell, danh mục Fowler, strangler fig | "Không bao giờ refactor mà không có test" |
-| **Complexity Critic** | Cyclomatic complexity, áp dụng YAGNI | "Không gọi là phức tạp mà không có bằng chứng" |
-| **Data Pipeline Engineer** | ETL, idempotency, migration schema | "Idempotency không thể thương lượng" |
-| **Technical Writer** | Tài liệu API, hướng dẫn, README | "Mỗi câu phải xứng đáng với vị trí của nó" |
-| **Translator** | i18n, file locale, dịch thuật kỹ thuật | "Không bao giờ dịch code identifier" |
-| **Compose Meta-Reviewer** | Kiểm toán thành phần đội agent | "Chặn thực thi khi điểm dưới 70" |
-| **Unreal GAS Specialist** | GameplayAbilitySystem, UE5 C++ | "Không tính damage trong GameplayAbilities" |
+  Match Quality
+    exact  106 (55%)   ← tên khớp trực tiếp
+    fuzzy   87 (45%)   ← từ khóa + từ đồng nghĩa khớp
+    none     0 (0%)    ← không khớp, passthrough
 
-### 136 Agent bên ngoài (13 bộ phận)
+  Top Agents
+    qa_engineer            89 ████████████████████
+    frontend_developer     23 █████
+    backend_architect      15 ███
+```
 
-Từ [agency-agents](https://github.com/msitarzewski/agency-agents): engineering, game-dev, design, marketing, testing, sales, support, product, strategy, spatial-computing, academic, paid-media, project-management.
+---
+
+## 🛡️ An toàn & Hiệu suất
+
+| | |
+|:---|:---|
+| Độ trễ Hook | **< 50ms** mỗi lệnh gọi Agent |
+| Token overhead | **~350 token** mỗi persona |
+| Fail-open | Thiếu index hoặc binary → passthrough (không gián đoạn) |
+| Loại tích hợp | `Explore`, `Plan`, `general-purpose` → không bao giờ bị chặn |
+| Prompt đơn giản | Không dispatch agent, không overhead |
+| `agentcrow off` | Tắt hoàn toàn, mọi thứ được sao lưu |
+
+> [!IMPORTANT]
+> AgentCrow không bao giờ chặn Claude. Nếu có lỗi, prompt gốc được chuyển qua không thay đổi.
+
+---
+
+## 🏗️ Kiến trúc
+
+```
+~/.agentcrow/
+  ├── agents/
+  │   ├── builtin/          14 YAML (thủ công)
+  │   ├── external/         140 MD (agency-agents + cộng đồng)
+  │   └── md/               154 file .md hợp nhất
+  ├── catalog-index.json    Dựng sẵn để tra cứu <5ms
+  └── history.json          Bản ghi dispatch (1000 gần nhất)
+
+~/.claude/
+  ├── settings.json         SessionStart + PreToolUse hooks
+  ├── hooks/
+  │   └── agentcrow-inject.sh
+  └── agents/
+      └── INDEX.md          Danh mục agent
+```
 
 ---
 
@@ -263,6 +298,27 @@ agentcrow add https://example.com/a.md  # URL
 agentcrow remove my_agent               # Xóa (chỉ tùy chỉnh)
 ```
 
+Định dạng agent (`.md` hoặc `.yaml`):
+
+```markdown
+# My Custom Agent
+
+> One-line mission statement
+
+**Role:** my_custom_agent
+
+## Identity
+How this agent thinks and works.
+
+## MUST
+- Rule 1
+- Rule 2
+
+## MUST NOT
+- Anti-pattern 1
+- Anti-pattern 2
+```
+
 ---
 
 ## 🔌 MCP Server (Tùy chọn)
@@ -271,61 +327,7 @@ agentcrow remove my_agent               # Xóa (chỉ tùy chỉnh)
 agentcrow init --global --mcp
 ```
 
-Thêm 3 công cụ vào Claude Code: `agentcrow_match`, `agentcrow_search`, `agentcrow_list`. Claude có thể truy vấn danh mục agent theo chương trình.
-
----
-
-## 📊 Thống kê
-
-```bash
-agentcrow stats
-```
-
-```
-  🐦 AgentCrow Stats
-
-  Match Quality
-    exact  38 (81%)    ← tên khớp trực tiếp
-    fuzzy   7 (15%)    ← từ khóa + từ đồng nghĩa khớp
-    none    2 (4%)     ← không khớp, passthrough
-
-  Top Agents
-    frontend_developer     12 ████████████
-    qa_engineer             8 ████████
-    backend_architect       6 ██████
-```
-
----
-
-## 🛡️ An toàn & Hiệu suất
-
-| | |
-|:---|:---|
-| Độ trễ Hook | **< 50ms** mỗi lệnh gọi Agent tool |
-| Token overhead | **~350 token** mỗi lần tiêm persona |
-| Fail-open | Thiếu index hoặc binary → passthrough (không gián đoạn) |
-| Loại Claude tích hợp | `Explore`, `Plan`, `general-purpose` → không bao giờ bị chặn |
-| Prompt đơn giản | Không dispatch agent, không overhead |
-| `agentcrow off` | Tắt hoàn toàn, mọi thứ được sao lưu |
-
----
-
-## 🏗️ Kiến trúc
-
-```
-~/.agentcrow/
-  ├── agents/
-  │   ├── builtin/          14 YAML (thủ công)
-  │   ├── external/         136 MD (agency-agents)
-  │   └── md/               150 file .md hợp nhất
-  ├── catalog-index.json    Dựng sẵn để tra cứu <5ms
-  └── history.json          Bản ghi dispatch (1000 gần nhất)
-
-~/.claude/
-  ├── settings.json         SessionStart + PreToolUse hooks
-  └── hooks/
-      └── agentcrow-inject.sh
-```
+Thêm 3 công cụ vào Claude Code: `agentcrow_match`, `agentcrow_search`, `agentcrow_list`.
 
 ---
 
@@ -333,7 +335,7 @@ agentcrow stats
 
 ```bash
 git clone https://github.com/jee599/agentcrow.git
-cd agentcrow && npm install && npm test  # 187 tests
+cd agentcrow && npm install && npm test  # 190 tests
 ```
 
 ## 📜 Giấy phép
